@@ -1,3 +1,3 @@
-import * as HttpApiClient from "./HttpApiClient";
+import * as HttpApiClient from "./HttpApiClient"
 
-export { HttpApiClient };
+export { HttpApiClient }
