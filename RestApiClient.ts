@@ -1,6 +1,6 @@
 import { Headers, HttpBody, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform"
 import type { HttpMethod } from "@effect/platform/HttpMethod"
-import { Context, Data, Effect, Layer, Schema } from "effect"
+import { Context, Data, Effect, Layer, Option, Schema } from "effect"
 
 type IsEmptyObject<T> = T extends object ? (keyof T extends never ? true : false) : false
 
@@ -312,28 +312,38 @@ export function make<
 >(spec: Route<M, U, H, I, O, E>) {
 	const getHeaders = (params: MakerParams<U, H, I>) =>
 		Effect.gen(function* () {
-			if (!spec.headers) return
+			if (!spec.headers) return Headers.empty
 
 			if (typeof spec.headers === "function" && params && "headers" in params)
 				return yield* spec.headers(params.headers)
 
 			return spec.headers as Headers.Headers
-		}) as Effect.Effect<Headers | undefined, InferEffectError<H>, InferEffectRequirements<H>>
+		}).pipe(
+			Effect.flatMap((headers) =>
+				Effect.gen(function* () {
+					const contentType = Option.getOrUndefined(Headers.get("Content-Type")(headers))
+
+					if (!contentType && Schema.isSchema(spec.body))
+						return Headers.set("Content-Type", "application/json")(headers)
+					return headers
+				})
+			)
+		) as Effect.Effect<Headers.Headers, InferEffectError<H>, InferEffectRequirements<H>>
 
 	const parseResponse = (schema: Schema.Schema<any>, response: HttpClientResponse.HttpClientResponse) =>
 		Effect.gen(function* () {
 			const json = yield* response.json
 
-			return yield* Schema.parseJson(schema).pipe(Schema.decodeUnknown)(json)
+			return yield* schema.pipe(Schema.decodeUnknown)(json)
 		})
 
 	const getResponse = (getter: O | undefined, response: HttpClientResponse.HttpClientResponse) =>
 		Effect.gen(function* () {
 			if (!getter) return response
 
-			if (typeof getter === "function") return yield* getter(response)
+			if (Schema.isSchema(getter)) return yield* parseResponse(getter, response)
 
-			return yield* parseResponse(getter, response)
+			return yield* getter(response)
 		}) as Effect.Effect<
 			InferOutput<O>,
 			InferEffectError<O> | InferEffectError<typeof parseResponse>,
@@ -348,11 +358,11 @@ export function make<
 
 	const getError = (getter: E, response: HttpClientResponse.HttpClientResponse) =>
 		Effect.gen(function* () {
-			if (typeof getter === "function") return yield* Effect.fail(getter(response))
+			if (Schema.isSchema(getter)) {
+				const error = yield* parseResponse(getter, response)
 
-			const error = yield* parseResponse(getter, response)
-
-			yield* Effect.fail(error)
+				yield* Effect.fail(error)
+			} else return yield* Effect.fail(getter(response))
 		}) as Effect.Effect<
 			never,
 			InferResponseError<E> | InferEffectError<typeof parseResponse>,
@@ -368,14 +378,14 @@ export function make<
 
 			const headers = yield* getHeaders(params)
 
-			const bodyJson =
+			const body =
 				spec.body && params && "body" in params
-					? yield* Schema.encode(spec.body)(params.body).pipe(HttpBody.json)
+					? yield* Schema.encode(spec.body)(params.body).pipe(Effect.map(HttpBody.raw))
 					: undefined
 
 			const request = HttpClientRequest.make(spec.method)(url).pipe(
-				(req) => (bodyJson ? HttpClientRequest.setBody(req, bodyJson) : req),
-				(req) => (headers ? HttpClientRequest.setHeaders(req, headers) : req)
+				(req) => (body ? HttpClientRequest.setBody(req, body) : req),
+				HttpClientRequest.setHeaders(headers)
 			)
 
 			const client = (yield* HttpClient.HttpClient).pipe((client) =>
