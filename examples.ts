@@ -1,6 +1,6 @@
 import { FetchHttpClient, Headers, HttpClientResponse } from "@effect/platform"
 import { Config, Console, Effect, Layer, Schema } from "effect"
-import { HttpApiClient } from "."
+import { RestApiClient } from "."
 
 // simply describe the api endpoints and their responses (declaratively)
 // get back a type-safe function to create the request and send it
@@ -12,12 +12,12 @@ class Todo extends Schema.TaggedClass<Todo>("@app/schemas/Todo")("Todo", {
 	completed: Schema.Boolean,
 }) {}
 
-const getTodos = HttpApiClient.get({
+const getTodos = RestApiClient.get({
 	url: "/todos",
 	response: Todo.pipe(Schema.Array),
 })
 
-const getTodo = HttpApiClient.get({
+const getTodo = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	response: Todo,
 })
@@ -37,27 +37,27 @@ export class ApiError extends Schema.TaggedError<ApiError>()("@app/errors/ApiErr
 	message: Schema.String.pipe(Schema.optional),
 }) {}
 
-const createTodo = HttpApiClient.post({
+const createTodo = RestApiClient.post({
 	url: "/todos",
 	body: NewTodo,
 	response: Todo,
 	error: ApiError,
 })
 
-const updateTodo = HttpApiClient.put({
+const updateTodo = RestApiClient.put({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	body: Todo,
 	response: Todo,
 })
 
 // when no response schema or function is provided, the response is returned as is
-const deleteTodo = HttpApiClient.del({
+const deleteTodo = RestApiClient.del({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 })
 
 // URL can be a function that takes a record parameter and returns a string
 // This allows dynamic URL construction based on parameters
-const getTodoWithUrlFunction = HttpApiClient.get({
+const getTodoWithUrlFunction = RestApiClient.get({
 	url: (params: { id: string; version?: number }) =>
 		`/todos/${params.id}${params.version ? `?version=${params.version}` : ""}`,
 	response: Todo,
@@ -65,7 +65,7 @@ const getTodoWithUrlFunction = HttpApiClient.get({
 
 // Headers can be a static Headers instance
 // Useful when headers don't depend on request parameters
-const getTodoWithStaticHeaders = HttpApiClient.get({
+const getTodoWithStaticHeaders = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	headers: Headers.fromInput({
 		Accept: "application/json",
@@ -76,7 +76,7 @@ const getTodoWithStaticHeaders = HttpApiClient.get({
 
 // Headers can be a function that takes a record parameter and returns an Effect<Headers>
 // This allows dynamic header construction based on request parameters
-const createTodoWithDynamicHeaders = HttpApiClient.post({
+const createTodoWithDynamicHeaders = RestApiClient.post({
 	url: "/todos",
 	body: NewTodo,
 	headers: (params: { contentType: string; apiVersion: string }) =>
@@ -91,7 +91,7 @@ const createTodoWithDynamicHeaders = HttpApiClient.post({
 
 // Response can be a function that takes the received HttpClientResponse and returns an Effect
 // This allows custom response processing, transformation, or extraction of specific data
-const getTodoWithCustomResponse = HttpApiClient.get({
+const getTodoWithCustomResponse = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	response: (res: HttpClientResponse.HttpClientResponse) =>
 		Effect.gen(function* () {
@@ -113,7 +113,7 @@ const getTodoWithCustomResponse = HttpApiClient.get({
 
 // Error can also be a function that takes the HttpClientResponse and returns an error value
 // This allows custom error transformation based on the response
-const createTodoWithCustomError = HttpApiClient.post({
+const createTodoWithCustomError = RestApiClient.post({
 	url: "/todos",
 	body: NewTodo,
 	response: Todo,
@@ -186,7 +186,7 @@ class User extends Schema.TaggedClass<User>("@app/schemas/User")("User", {
 
 // Example 1: Client with default error handler only
 // All routes created from this client will use the same error handler
-const clientWithDefaultError = new HttpApiClient.Client({
+const clientWithDefaultError = new RestApiClient.Client({
 	error: (res: HttpClientResponse.HttpClientResponse) =>
 		new ApiError({
 			method: res.request.method,
@@ -210,7 +210,7 @@ const getUsers = clientWithDefaultError.get({
 
 // Example 2: Client with default static headers
 // Useful for API versioning or consistent headers across all requests
-const clientWithDefaultHeaders = new HttpApiClient.Client({
+const clientWithDefaultHeaders = new RestApiClient.Client({
 	headers: Headers.fromInput({
 		Accept: "application/json",
 		"X-API-Version": "v2",
@@ -225,7 +225,7 @@ const getTodosWithDefaultHeaders = clientWithDefaultHeaders.get({
 
 // Example 3: Client with default dynamic headers
 // Headers can be computed based on request parameters
-const clientWithDynamicHeaders = new HttpApiClient.Client({
+const clientWithDynamicHeaders = new RestApiClient.Client({
 	headers: (params: { apiVersion: string; clientId: string }) =>
 		Effect.succeed(
 			Headers.fromInput({
@@ -243,7 +243,7 @@ const getTodosWithDynamicHeaders = clientWithDynamicHeaders.get({
 
 // Example 4: Client with both default headers and error handler
 // This is the most common pattern - centralized configuration for consistency
-const apiClient = new HttpApiClient.Client({
+const apiClient = new RestApiClient.Client({
 	headers: Headers.fromInput({
 		Accept: "application/json",
 		"X-API-Version": "v1",
@@ -317,7 +317,7 @@ class AuthError extends Schema.TaggedClass<AuthError>("@app/errors/AuthError")("
 }) {}
 
 const ApiClientConfigLive = Layer.effect(
-	HttpApiClient.Config,
+	RestApiClient.Config,
 	Effect.gen(function* () {
 		// get the base url for the api, for example from the environment variables
 		const url = yield* Config.string("NEXT_PUBLIC_API_URL")
@@ -333,7 +333,7 @@ const ApiClientConfigLive = Layer.effect(
 )
 
 // provide the api client layer with the fetch http client and the api client config
-const layer = HttpApiClient.layer.pipe(Layer.provide([FetchHttpClient.layer, ApiClientConfigLive]))
+const layer = RestApiClient.layer.pipe(Layer.provide([FetchHttpClient.layer, ApiClientConfigLive]))
 
 // Run examples with the layer
 test.pipe(Effect.provide(layer), Effect.runPromise)

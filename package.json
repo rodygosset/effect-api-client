@@ -1,5 +1,5 @@
 {
-	"name": "http-api-client",
+	"name": "rest-api-client",
 	"module": "index.ts",
 	"type": "module",
 	"private": true,

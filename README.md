@@ -1,10 +1,10 @@
-# HttpApiClient
+# RestApiClient
 
 A type-safe HTTP client library built on [Effect](https://effect.website) that transforms declarative route descriptions into fully type-safe, composable callable functions.
 
 ## Value Proposition
 
-Instead of manually constructing HTTP requests with scattered type assertions and error handling, `HttpApiClient` lets you **describe your API routes declaratively** and get back **fully type-safe, Effect-based functions** that handle:
+Instead of manually constructing HTTP requests with scattered type assertions and error handling, `RestApiClient` lets you **describe your API routes declaratively** and get back **fully type-safe, Effect-based functions** that handle:
 
 -   **Type-safe URL construction** - Dynamic URLs with compile-time parameter validation
 -   **Automatic request/response encoding/decoding** - Using Effect Schema for validation
@@ -15,7 +15,7 @@ Instead of manually constructing HTTP requests with scattered type assertions an
 
 ```ts
 // Describe your route declaratively
-const getTodo = HttpApiClient.get({
+const getTodo = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	response: Todo,
 	error: ApiError, // a Schema.TaggedError class
@@ -44,7 +44,7 @@ bun add effect @effect/platform
 ```ts
 import { FetchHttpClient, Headers } from "@effect/platform"
 import { Effect, Layer, Schema } from "effect"
-import { HttpApiClient } from "."
+import { RestApiClient } from "."
 
 // Define your data schemas
 class Todo extends Schema.TaggedClass<Todo>("@app/Todo")("Todo", {
@@ -54,7 +54,7 @@ class Todo extends Schema.TaggedClass<Todo>("@app/Todo")("Todo", {
 }) {}
 
 // Describe your API route
-const getTodo = HttpApiClient.get({
+const getTodo = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	response: Todo,
 })
@@ -66,7 +66,7 @@ const program = Effect.gen(function* () {
 })
 
 // Provide the HTTP client layer
-program.pipe(Effect.provide(HttpApiClient.layer.pipe(Layer.provide(FetchHttpClient.layer))), Effect.runPromise)
+program.pipe(Effect.provide(RestApiClient.layer.pipe(Layer.provide(FetchHttpClient.layer))), Effect.runPromise)
 ```
 
 ## Core Concepts
@@ -88,7 +88,7 @@ The `Route` class is the foundation - it describes an HTTP endpoint with:
 Use the provided convenience methods
 
 ```ts
-const getTodo = HttpApiClient.get({
+const getTodo = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	response: Todo,
 })
@@ -101,7 +101,7 @@ The convenience methods (`get`, `post`, `put`, `del`) automatically set the HTTP
 ### 1. Simple GET Request
 
 ```ts
-const getTodos = HttpApiClient.get({
+const getTodos = RestApiClient.get({
 	url: "/todos",
 	response: Todo.pipe(Schema.Array),
 })
@@ -117,7 +117,7 @@ const program = Effect.gen(function* () {
 ```ts
 const NewTodo = Todo.pipe(Schema.omit("id", "completed", "_tag"))
 
-const createTodo = HttpApiClient.post({
+const createTodo = RestApiClient.post({
 	url: "/todos",
 	body: NewTodo,
 	response: Todo,
@@ -134,7 +134,7 @@ const program = Effect.gen(function* () {
 ### 3. Dynamic URLs
 
 ```ts
-const getTodo = HttpApiClient.get({
+const getTodo = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	response: Todo,
 })
@@ -149,7 +149,7 @@ const program = Effect.gen(function* () {
 You can also include optional parameters:
 
 ```ts
-const getTodo = HttpApiClient.get({
+const getTodo = RestApiClient.get({
 	url: (params: { id: string; version?: number }) =>
 		`/todos/${params.id}${params.version ? `?version=${params.version}` : ""}`,
 	response: Todo,
@@ -164,7 +164,7 @@ const program = Effect.gen(function* () {
 ### 4. Static Headers
 
 ```ts
-const getTodo = HttpApiClient.get({
+const getTodo = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	headers: Headers.fromInput({
 		Accept: "application/json",
@@ -179,7 +179,7 @@ const getTodo = HttpApiClient.get({
 Headers can be functions that return `Effect<Headers>`:
 
 ```ts
-const createTodo = HttpApiClient.post({
+const createTodo = RestApiClient.post({
 	url: "/todos",
 	body: NewTodo,
 	headers: (params: { contentType: string; apiVersion: string }) =>
@@ -206,7 +206,7 @@ const program = Effect.gen(function* () {
 Response schemas automatically parse and validate JSON responses:
 
 ```ts
-const getTodos = HttpApiClient.get({
+const getTodos = RestApiClient.get({
 	url: "/todos",
 	response: Todo.pipe(Schema.Array),
 })
@@ -227,7 +227,7 @@ Error handling is triggered when `filterStatusOk` is `false` (the default) and t
 ```ts
 import { ApiError } from "@/lib/app-error"
 
-const createTodo = HttpApiClient.post({
+const createTodo = RestApiClient.post({
 	url: "/todos",
 	body: NewTodo,
 	response: Todo,
@@ -244,7 +244,7 @@ const program = Effect.gen(function* () {
 **With Custom Error Function:**
 
 ```ts
-const createTodo = HttpApiClient.post({
+const createTodo = RestApiClient.post({
 	url: "/todos",
 	body: NewTodo,
 	response: Todo,
@@ -300,7 +300,7 @@ program.pipe(
 For complex response processing, use a function that returns an `Effect`:
 
 ```ts
-const getTodoWithMetadata = HttpApiClient.get({
+const getTodoWithMetadata = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	response: (res: HttpClientResponse.HttpClientResponse) =>
 		Effect.gen(function* () {
@@ -330,7 +330,7 @@ const program = Effect.gen(function* () {
 For non-JSON responses (like PDFs, images, etc.):
 
 ```ts
-const getDocument = HttpApiClient.get({
+const getDocument = RestApiClient.get({
 	url: (params: { id: string }) => `/documents/${params.id}`,
 	headers: Headers.fromInput({ Accept: "application/octet-stream" }),
 	response: (res: HttpClientResponse.HttpClientResponse) =>
@@ -359,17 +359,17 @@ const program = Effect.gen(function* () {
 One of the most powerful features is composing multiple API calls using Effect's composition:
 
 ```ts
-const getTodos = HttpApiClient.get({
+const getTodos = RestApiClient.get({
 	url: "/todos",
 	response: Todo.pipe(Schema.Array),
 })
 
-const getTodo = HttpApiClient.get({
+const getTodo = RestApiClient.get({
 	url: (params: { id: string }) => `/todos/${params.id}`,
 	response: Todo,
 })
 
-const createTodo = HttpApiClient.post({
+const createTodo = RestApiClient.post({
 	url: "/todos",
 	body: NewTodo,
 	response: Todo,
@@ -434,7 +434,7 @@ import { auth } from "@/auth"
 
 // Using Next.js + Auth.js for example
 const ApiClientConfigLive = Layer.effect(
-	HttpApiClient.Config,
+	RestApiClient.Config,
 	Effect.gen(function* () {
 		// Read from environment variables
 		const url = yield* Config.string("NEXT_PUBLIC_API_URL")
@@ -450,7 +450,7 @@ const ApiClientConfigLive = Layer.effect(
 )
 
 // Compose all layers
-const apiLayer = HttpApiClient.layer.pipe(Layer.provide([FetchHttpClient.layer, ApiClientConfigLive]))
+const apiLayer = RestApiClient.layer.pipe(Layer.provide([FetchHttpClient.layer, ApiClientConfigLive]))
 
 // Use in your application
 const program = Effect.gen(function* () {
@@ -467,7 +467,7 @@ program.pipe(Effect.provide(apiLayer), Effect.runPromise)
 
 ```ts
 // In tests, provide a mock layer
-const mockLayer = HttpApiClient.layer.pipe(Layer.provide(MockHttpClient.layer))
+const mockLayer = RestApiClient.layer.pipe(Layer.provide(MockHttpClient.layer))
 ```
 
 2. **Flexibility** - Configuration can come from anywhere (env vars, config files, remote services)
@@ -489,12 +489,12 @@ The `Client` class allows you to define default headers and error handling that 
 #### Creating a Client with Default Error Handler
 
 ```ts
-import { HttpApiClient } from "."
+import { RestApiClient } from "."
 import { ApiError } from "@/lib/app-error"
 import { HttpClientResponse } from "@effect/platform"
 
 // Create a client with a default error handler
-const apiClient = new HttpApiClient.Client({
+const apiClient = new RestApiClient.Client({
 	error: (res: HttpClientResponse.HttpClientResponse) =>
 		new ApiError({
 			method: res.request.method,
@@ -535,11 +535,11 @@ const program = Effect.gen(function* () {
 #### Creating a Client with Default Headers
 
 ```ts
-import { HttpApiClient } from "."
+import { RestApiClient } from "."
 import { Headers } from "@effect/platform"
 
 // Create a client with default static headers
-const apiClient = new HttpApiClient.Client({
+const apiClient = new RestApiClient.Client({
 	headers: Headers.fromInput({
 		Accept: "application/json",
 		"X-API-Version": "v2",
@@ -559,11 +559,11 @@ const todos = yield * getTodos()
 #### Creating a Client with Dynamic Default Headers
 
 ```ts
-import { HttpApiClient } from "."
+import { RestApiClient } from "."
 import { Headers, Effect } from "@effect/platform"
 
 // Create a client with default dynamic headers
-const apiClient = new HttpApiClient.Client({
+const apiClient = new RestApiClient.Client({
 	headers: (params: { apiVersion: string; clientId: string }) =>
 		Effect.succeed(
 			Headers.fromInput({
@@ -588,11 +588,11 @@ const todos = yield * getTodos({ headers: { apiVersion: "v2", clientId: "web-app
 This is the most common pattern - centralized configuration for consistency:
 
 ```ts
-import { HttpApiClient } from "."
+import { RestApiClient } from "."
 import { ApiError } from "@/lib/app-error"
 import { Headers, HttpClientResponse } from "@effect/platform"
 
-const apiClient = new HttpApiClient.Client({
+const apiClient = new RestApiClient.Client({
 	headers: Headers.fromInput({
 		Accept: "application/json",
 		"X-API-Version": "v1",
@@ -635,10 +635,10 @@ const deleteTodo = apiClient.del({
 Sometimes a specific route needs different error handling or headers:
 
 ```ts
-import { HttpApiClient } from "."
+import { RestApiClient } from "."
 import { ApiError } from "@/lib/app-error"
 
-const apiClient = new HttpApiClient.Client({
+const apiClient = new RestApiClient.Client({
 	error: ApiError, // default error handler
 })
 
@@ -668,12 +668,12 @@ const getPublicData = apiClient.get({
 You can create multiple clients for different API services:
 
 ```ts
-import { HttpApiClient } from "."
+import { RestApiClient } from "."
 import { ApiError } from "@/lib/app-error"
 import { Headers } from "@effect/platform"
 
 // Main API client
-const mainApiClient = new HttpApiClient.Client({
+const mainApiClient = new RestApiClient.Client({
 	headers: Headers.fromInput({
 		Accept: "application/json",
 		"X-API-Version": "v1",
@@ -689,7 +689,7 @@ const mainApiClient = new HttpApiClient.Client({
 })
 
 // External API client with different configuration
-const externalApiClient = new HttpApiClient.Client({
+const externalApiClient = new RestApiClient.Client({
 	headers: Headers.fromInput({
 		Accept: "application/json",
 		"X-Source": "web-app",
@@ -719,7 +719,7 @@ const getExternalData = externalApiClient.get({
 
 ### Automatic Base URL and Authentication
 
-The `HttpApiClient.layer` automatically:
+The `RestApiClient.layer` automatically:
 
 -   **Prepends base URL** to relative URLs (those starting with `/`)
 -   **Adds Bearer token** to requests when `accessToken` is provided
@@ -743,7 +743,7 @@ import { Schema } from "effect"
 
 const priorities = ["low", "medium", "high", "urgent"] as const
 
-const setTodoPriorities = HttpApiClient.post({
+const setTodoPriorities = RestApiClient.post({
 	url: (params: { todoId: string }) => `/todos/${params.todoId}/priorities`,
 	body: Schema.Array(Schema.Literal(...priorities)),
 	response: Schema.Array(Schema.Literal(...priorities)),
@@ -771,7 +771,7 @@ Effect provides powerful inversion of control through its Effect type and Layer 
 -   **Resource safety** - Automatic cleanup and error recovery
 -   **Observability** - Built-in tracing and monitoring
 
-This makes `HttpApiClient` not just a type-safe HTTP client, but a foundation for building robust, maintainable applications.
+This makes `RestApiClient` not just a type-safe HTTP client, but a foundation for building robust, maintainable applications.
 
 ## See Also
 

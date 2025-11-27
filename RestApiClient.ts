@@ -76,10 +76,10 @@ export type OutputFunction =
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Schema for automatic error parsing
- * const createTodo = HttpApiClient.post({
+ * const createTodo = RestApiClient.post({
  *   url: "/todos",
  *   body: NewTodo,
  *   response: Todo,
@@ -89,10 +89,10 @@ export type OutputFunction =
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Custom error function
- * const createTodo = HttpApiClient.post({
+ * const createTodo = RestApiClient.post({
  *   url: "/todos",
  *   body: NewTodo,
  *   response: Todo,
@@ -129,9 +129,9 @@ export type ErrorFunction = Schema.Schema<any> | ((res: HttpClientResponse.HttpC
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
- * const route = new HttpApiClient.Route({
+ * const route = new RestApiClient.Route({
  *   method: "GET",
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   headers: Headers.fromInput({ Accept: "application/json" }),
@@ -141,10 +141,10 @@ export type ErrorFunction = Schema.Schema<any> | ((res: HttpClientResponse.HttpC
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Route with error handling
- * const route = new HttpApiClient.Route({
+ * const route = new RestApiClient.Route({
  *   method: "POST",
  *   url: "/todos",
  *   body: NewTodo,
@@ -160,7 +160,7 @@ export class Route<
 	I extends Schema.Schema<any> = never,
 	O extends OutputFunction = never,
 	E extends ErrorFunction = never
-> extends Data.TaggedClass("@HttpApiClient/Route")<{
+> extends Data.TaggedClass("@RestApiClient/Route")<{
 	/** The URL endpoint. Can be a static string or a function that takes a record parameter and returns a string. */
 	url: U
 	/** The HTTP method for this route */
@@ -227,9 +227,9 @@ type InferEffectRequirements<E> = E extends (...args: any[]) => Effect.Effect<an
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
- * const getTodo = HttpApiClient.make(new HttpApiClient.Route({
+ * const getTodo = RestApiClient.make(new RestApiClient.Route({
  *   method: "GET",
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   response: Todo
@@ -244,10 +244,10 @@ type InferEffectRequirements<E> = E extends (...args: any[]) => Effect.Effect<an
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // With dynamic headers
- * const createTodo = HttpApiClient.make(new HttpApiClient.Route({
+ * const createTodo = RestApiClient.make(new RestApiClient.Route({
  *   method: "POST",
  *   url: "/todos",
  *   headers: (params: { contentType: string }) =>
@@ -267,10 +267,10 @@ type InferEffectRequirements<E> = E extends (...args: any[]) => Effect.Effect<an
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // With custom response handler
- * const getTodoWithMetadata = HttpApiClient.make(new HttpApiClient.Route({
+ * const getTodoWithMetadata = RestApiClient.make(new RestApiClient.Route({
  *   method: "GET",
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   response: (res: HttpClientResponse.HttpClientResponse) =>
@@ -283,10 +283,10 @@ type InferEffectRequirements<E> = E extends (...args: any[]) => Effect.Effect<an
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // With error handling (filterStatusOk defaults to false)
- * const createTodo = HttpApiClient.make(new HttpApiClient.Route({
+ * const createTodo = RestApiClient.make(new RestApiClient.Route({
  *   method: "POST",
  *   url: "/todos",
  *   body: NewTodo,
@@ -406,10 +406,10 @@ export function make<
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Simple GET with static URL
- * const getTodos = HttpApiClient.get({
+ * const getTodos = RestApiClient.get({
  *   url: "/todos",
  *   response: Todo.pipe(Schema.Array)
  * })
@@ -422,10 +422,10 @@ export function make<
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // GET with dynamic URL and static headers
- * const getTodo = HttpApiClient.get({
+ * const getTodo = RestApiClient.get({
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   headers: Headers.fromInput({ Accept: "application/json" }),
  *   response: Todo
@@ -439,10 +439,10 @@ export function make<
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // GET with custom response handler
- * const getTodoWithMetadata = HttpApiClient.get({
+ * const getTodoWithMetadata = RestApiClient.get({
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   response: (res: HttpClientResponse.HttpClientResponse) =>
  *     Effect.gen(function* () {
@@ -454,10 +454,10 @@ export function make<
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // GET with error handling
- * const getTodo = HttpApiClient.get({
+ * const getTodo = RestApiClient.get({
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   response: Todo,
  *   error: ApiError
@@ -495,10 +495,10 @@ export const get = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // POST with body schema
- * const createTodo = HttpApiClient.post({
+ * const createTodo = RestApiClient.post({
  *   url: "/todos",
  *   body: NewTodo,
  *   response: Todo
@@ -512,10 +512,10 @@ export const get = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // POST with dynamic URL, headers, and body
- * const createTodoWithHeaders = HttpApiClient.post({
+ * const createTodoWithHeaders = RestApiClient.post({
  *   url: (params: { userId: string }) => `/users/${params.userId}/todos`,
  *   headers: (params: { contentType: string }) =>
  *     Effect.succeed(Headers.fromInput({ "Content-Type": params.contentType })),
@@ -535,10 +535,10 @@ export const get = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // POST with error handling
- * const createTodo = HttpApiClient.post({
+ * const createTodo = RestApiClient.post({
  *   url: "/todos",
  *   body: NewTodo,
  *   response: Todo,
@@ -579,10 +579,10 @@ export const post = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // PUT with dynamic URL and body
- * const updateTodo = HttpApiClient.put({
+ * const updateTodo = RestApiClient.put({
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   body: Todo,
  *   response: Todo
@@ -599,10 +599,10 @@ export const post = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // PUT with error handling
- * const updateTodo = HttpApiClient.put({
+ * const updateTodo = RestApiClient.put({
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   body: Todo,
  *   response: Todo,
@@ -646,10 +646,10 @@ export const put = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Simple DELETE without response handler
- * const deleteTodo = HttpApiClient.del({
+ * const deleteTodo = RestApiClient.del({
  *   url: (params: { id: string }) => `/todos/${params.id}`
  * })
  *
@@ -662,10 +662,10 @@ export const put = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // DELETE with response schema
- * const deleteTodoWithResponse = HttpApiClient.del({
+ * const deleteTodoWithResponse = RestApiClient.del({
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   response: Schema.Object({ deleted: Schema.Boolean })
  * })
@@ -678,10 +678,10 @@ export const put = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // DELETE with error handling
- * const deleteTodo = HttpApiClient.del({
+ * const deleteTodo = RestApiClient.del({
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   error: ApiError
  * })
@@ -723,12 +723,12 @@ export const del = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  * import { ApiError } from "@/lib/app-error"
  * import { Headers } from "@effect/platform"
  *
  * // Create a client with default error handling
- * const apiClient = new HttpApiClient.Client({
+ * const apiClient = new RestApiClient.Client({
  *   error: (res: HttpClientResponse.HttpClientResponse) =>
  *     new ApiError({
  *       method: res.request.method,
@@ -748,11 +748,11 @@ export const del = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  * import { Headers } from "@effect/platform"
  *
  * // Create a client with default headers
- * const apiClient = new HttpApiClient.Client({
+ * const apiClient = new RestApiClient.Client({
  *   headers: Headers.fromInput({
  *     Accept: "application/json",
  *     "X-API-Version": "v2",
@@ -767,12 +767,12 @@ export const del = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  * import { ApiError } from "@/lib/app-error"
  * import { Headers, Effect } from "@effect/platform"
  *
  * // Create a client with both default headers and error handler
- * const apiClient = new HttpApiClient.Client({
+ * const apiClient = new RestApiClient.Client({
  *   headers: (params: { apiVersion: string }) =>
  *     Effect.succeed(
  *       Headers.fromInput({
@@ -805,10 +805,10 @@ export const del = <
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Routes can override defaults when needed
- * const apiClient = new HttpApiClient.Client({
+ * const apiClient = new RestApiClient.Client({
  *   error: ApiError, // default error handler
  * })
  *
@@ -830,7 +830,7 @@ export const del = <
 export class Client<
 	DefaultHeaders extends HeadersFunction = undefined,
 	DefaultError extends ErrorFunction = never
-> extends Data.TaggedClass("@HttpApiClient/Client")<{
+> extends Data.TaggedClass("@RestApiClient/Client")<{
 	headers?: DefaultHeaders
 	error?: DefaultError
 }> {
@@ -850,10 +850,10 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 * import { ApiError } from "@/lib/app-error"
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   error: ApiError,
 	 * })
 	 *
@@ -871,10 +871,10 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 * import { Headers } from "@effect/platform"
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   headers: Headers.fromInput({ Accept: "application/json" }),
 	 * })
 	 *
@@ -892,9 +892,9 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   error: ApiError,
 	 * })
 	 *
@@ -941,10 +941,10 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 * import { ApiError } from "@/lib/app-error"
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   error: ApiError,
 	 * })
 	 *
@@ -963,10 +963,10 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 * import { Headers, Effect } from "@effect/platform"
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   headers: (params: { contentType: string }) =>
 	 *     Effect.succeed(Headers.fromInput({ "Content-Type": params.contentType })),
 	 * })
@@ -1023,10 +1023,10 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 * import { ApiError } from "@/lib/app-error"
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   error: ApiError,
 	 * })
 	 *
@@ -1048,9 +1048,9 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   headers: Headers.fromInput({ "X-API-Version": "v2" }),
 	 * })
 	 *
@@ -1098,10 +1098,10 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 * import { ApiError } from "@/lib/app-error"
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   error: ApiError,
 	 * })
 	 *
@@ -1119,9 +1119,9 @@ export class Client<
 	 *
 	 * @example
 	 * ```ts
-	 * import { HttpApiClient } from "."
+	 * import { RestApiClient } from "."
 	 *
-	 * const apiClient = new HttpApiClient.Client({
+	 * const apiClient = new RestApiClient.Client({
 	 *   headers: Headers.fromInput({ "X-API-Version": "v2" }),
 	 * })
 	 *
@@ -1171,11 +1171,11 @@ export class Client<
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Provide the config using a Layer
  * const ApiClientConfigLive = Layer.effect(
- *   HttpApiClient.Config,
+ *   RestApiClient.Config,
  *   Effect.gen(function* () {
  *     const url = yield* Config.string("NEXT_PUBLIC_API_URL")
  *     const accessToken = yield* Effect.tryPromise({
@@ -1189,15 +1189,15 @@ export class Client<
  *
  * @example
  * ```ts
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Use with the layer
- * const layer = HttpApiClient.layer.pipe(
+ * const layer = RestApiClient.layer.pipe(
  *   Layer.provide([FetchHttpClient.layer, ApiClientConfigLive])
  * )
  * ```
  */
-export class Config extends Context.Tag("@HttpApiClient/Config")<
+export class Config extends Context.Tag("@RestApiClient/Config")<
 	Config,
 	{ url: string; accessToken: string | undefined }
 >() {}
@@ -1206,12 +1206,12 @@ export class Config extends Context.Tag("@HttpApiClient/Config")<
  * Layer that provides a configured HttpClient for API requests.
  *
  * This layer creates an HttpClient that:
- * - Automatically prepends the base URL from `HttpApiClient.Config` to relative URLs (those starting with "/")
+ * - Automatically prepends the base URL from `RestApiClient.Config` to relative URLs (those starting with "/")
  * - Automatically adds a Bearer token authorization header when `accessToken` is provided in the config
  * - Leaves absolute URLs unchanged
  *
  * Requires:
- * - `HttpApiClient.Config` - Configuration with base URL and optional access token
+ * - `RestApiClient.Config` - Configuration with base URL and optional access token
  * - `HttpClient.HttpClient` - Base HTTP client implementation (e.g., `FetchHttpClient.layer`)
  *
  * @returns A Layer that provides `HttpClient.HttpClient` with API-specific configuration applied
@@ -1219,11 +1219,11 @@ export class Config extends Context.Tag("@HttpApiClient/Config")<
  * @example
  * ```ts
  * import { FetchHttpClient } from "@effect/platform"
- * import { HttpApiClient } from "."
+ * import { RestApiClient } from "."
  *
  * // Provide the API client config
  * const ApiClientConfigLive = Layer.effect(
- *   HttpApiClient.Config,
+ *   RestApiClient.Config,
  *   Effect.gen(function* () {
  *     const url = yield* Config.string("NEXT_PUBLIC_API_URL")
  *     const accessToken = yield* Effect.tryPromise({
@@ -1235,12 +1235,12 @@ export class Config extends Context.Tag("@HttpApiClient/Config")<
  * )
  *
  * // Provide the layer with FetchHttpClient and config
- * const apiLayer = HttpApiClient.layer.pipe(
+ * const apiLayer = RestApiClient.layer.pipe(
  *   Layer.provide([FetchHttpClient.layer, ApiClientConfigLive])
  * )
  *
  * // Use in your application
- * const getTodo = HttpApiClient.get({
+ * const getTodo = RestApiClient.get({
  *   url: (params: { id: string }) => `/todos/${params.id}`,
  *   response: Todo
  * })

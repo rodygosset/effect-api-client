@@ -1,3 +1,3 @@
-import * as HttpApiClient from "./HttpApiClient"
+import * as RestApiClient from "./RestApiClient"
 
-export { HttpApiClient }
+export { RestApiClient }
