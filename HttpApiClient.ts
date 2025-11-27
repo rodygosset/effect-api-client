@@ -1,18 +1,8 @@
-import {
-  Headers,
-  HttpBody,
-  HttpClient,
-  HttpClientRequest,
-  HttpClientResponse,
-} from "@effect/platform";
-import type { HttpMethod } from "@effect/platform/HttpMethod";
-import { Context, Data, Effect, Layer, Schema } from "effect";
+import { Headers, HttpBody, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform"
+import type { HttpMethod } from "@effect/platform/HttpMethod"
+import { Context, Data, Effect, Layer, Schema } from "effect"
 
-type IsEmptyObject<T> = T extends object
-  ? keyof T extends never
-    ? true
-    : false
-  : false;
+type IsEmptyObject<T> = T extends object ? (keyof T extends never ? true : false) : false
 
 /**
  * Represents a URL that can be either a static string or a function that dynamically generates a URL.
@@ -26,7 +16,7 @@ type IsEmptyObject<T> = T extends object
  * url: (params: { id: string }) => `/todos/${params.id}`
  * ```
  */
-export type UrlFunction = string | ((arg: any) => string);
+export type UrlFunction = string | ((arg: any) => string)
 
 /**
  * Represents headers that can be:
@@ -47,10 +37,7 @@ export type UrlFunction = string | ((arg: any) => string);
  *   Effect.succeed(Headers.fromInput({ "Content-Type": params.contentType }))
  * ```
  */
-export type HeadersFunction =
-  | Headers.Headers
-  | ((arg: any) => Effect.Effect<Headers.Headers, any, any>)
-  | undefined;
+export type HeadersFunction = Headers.Headers | ((arg: any) => Effect.Effect<Headers.Headers, any, any>) | undefined
 
 /**
  * Represents response handling that can be:
@@ -75,10 +62,8 @@ export type HeadersFunction =
  * ```
  */
 export type OutputFunction =
-  | Schema.Schema<any>
-  | ((
-      res: HttpClientResponse.HttpClientResponse
-    ) => Effect.Effect<any, any, any>);
+	| Schema.Schema<any>
+	| ((res: HttpClientResponse.HttpClientResponse) => Effect.Effect<any, any, any>)
 
 /**
  * Represents error handling that can be:
@@ -122,9 +107,7 @@ export type OutputFunction =
  * })
  * ```
  */
-export type ErrorFunction =
-  | Schema.Schema<any>
-  | ((res: HttpClientResponse.HttpClientResponse) => any);
+export type ErrorFunction = Schema.Schema<any> | ((res: HttpClientResponse.HttpClientResponse) => any)
 
 /**
  * Represents an HTTP route configuration with type-safe URL, headers, body, response handling, and error handling.
@@ -171,65 +154,56 @@ export type ErrorFunction =
  * ```
  */
 export class Route<
-  M extends HttpMethod,
-  U extends UrlFunction,
-  H extends HeadersFunction = undefined,
-  I extends Schema.Schema<any> = never,
-  O extends OutputFunction = never,
-  E extends ErrorFunction = never
+	M extends HttpMethod,
+	U extends UrlFunction,
+	H extends HeadersFunction = undefined,
+	I extends Schema.Schema<any> = never,
+	O extends OutputFunction = never,
+	E extends ErrorFunction = never
 > extends Data.TaggedClass("@HttpApiClient/Route")<{
-  /** The URL endpoint. Can be a static string or a function that takes a record parameter and returns a string. */
-  url: U;
-  /** The HTTP method for this route */
-  method: M;
-  /** Optional headers. Can be a static Headers instance or a function that takes a record parameter and returns an Effect<Headers>. */
-  headers?: H;
-  /** Optional body schema for request validation and encoding */
-  body?: I;
-  /** Optional response handler. Can be a Schema for automatic parsing or a function that takes HttpClientResponse and returns an Effect. */
-  response?: O;
-  /** Optional error handler. Can be a Schema for automatic error parsing or a function that takes HttpClientResponse and returns an error value. Only triggered when filterStatusOk is false and response status is outside 200-299 range. */
-  error?: E;
-  /** Whether to filter non-OK status codes (defaults to false) */
-  filterStatusOk?: boolean;
+	/** The URL endpoint. Can be a static string or a function that takes a record parameter and returns a string. */
+	url: U
+	/** The HTTP method for this route */
+	method: M
+	/** Optional headers. Can be a static Headers instance or a function that takes a record parameter and returns an Effect<Headers>. */
+	headers?: H
+	/** Optional body schema for request validation and encoding */
+	body?: I
+	/** Optional response handler. Can be a Schema for automatic parsing or a function that takes HttpClientResponse and returns an Effect. */
+	response?: O
+	/** Optional error handler. Can be a Schema for automatic error parsing or a function that takes HttpClientResponse and returns an error value. Only triggered when filterStatusOk is false and response status is outside 200-299 range. */
+	error?: E
+	/** Whether to filter non-OK status codes (defaults to false) */
+	filterStatusOk?: boolean
 }> {}
 
-export type MakerUrl<U extends UrlFunction> = U extends (arg: any) => string
-  ? { url: Parameters<U>[0] }
-  : {};
+export type MakerUrl<U extends UrlFunction> = U extends (arg: any) => string ? { url: Parameters<U>[0] } : {}
 export type MakerHeaders<H extends HeadersFunction = undefined> = H extends (
-  arg: any
+	arg: any
 ) => Effect.Effect<Headers.Headers, any, any>
-  ? { headers: Parameters<H>[0] }
-  : {};
-export type MakerBody<I extends Schema.Schema<any> = never> =
-  Schema.Schema.Type<I> extends void ? {} : { body: Schema.Schema.Type<I> };
+	? { headers: Parameters<H>[0] }
+	: {}
+export type MakerBody<I extends Schema.Schema<any> = never> = Schema.Schema.Type<I> extends void
+	? {}
+	: { body: Schema.Schema.Type<I> }
 
 export type MakerParams<
-  U extends UrlFunction,
-  H extends HeadersFunction = undefined,
-  I extends Schema.Schema<any> = never
+	U extends UrlFunction,
+	H extends HeadersFunction = undefined,
+	I extends Schema.Schema<any> = never
 > = IsEmptyObject<MakerUrl<U> & MakerHeaders<H> & MakerBody<I>> extends true
-  ? void
-  : MakerUrl<U> & MakerHeaders<H> & MakerBody<I>;
+	? void
+	: MakerUrl<U> & MakerHeaders<H> & MakerBody<I>
 
 type InferOutput<O extends OutputFunction> = [O] extends [never]
-  ? HttpClientResponse.HttpClientResponse
-  : O extends (...args: any[]) => Effect.Effect<any, any, any>
-  ? Effect.Effect.Success<ReturnType<O>>
-  : Schema.Schema.Type<O>;
+	? HttpClientResponse.HttpClientResponse
+	: O extends (...args: any[]) => Effect.Effect<any, any, any>
+	? Effect.Effect.Success<ReturnType<O>>
+	: Schema.Schema.Type<O>
 
-type InferEffectError<E> = E extends (
-  ...args: any[]
-) => Effect.Effect<any, infer F, any>
-  ? F
-  : never;
+type InferEffectError<E> = E extends (...args: any[]) => Effect.Effect<any, infer F, any> ? F : never
 
-type InferEffectRequirements<E> = E extends (
-  ...args: any[]
-) => Effect.Effect<any, any, infer R>
-  ? R
-  : never;
+type InferEffectRequirements<E> = E extends (...args: any[]) => Effect.Effect<any, any, infer R> ? R : never
 
 /**
  * Creates a type-safe HTTP client function from a Route specification.
@@ -329,111 +303,92 @@ type InferEffectRequirements<E> = E extends (
  * ```
  */
 export function make<
-  M extends HttpMethod,
-  U extends UrlFunction,
-  H extends HeadersFunction = undefined,
-  I extends Schema.Schema<any> = never,
-  O extends OutputFunction = never,
-  E extends ErrorFunction = never
+	M extends HttpMethod,
+	U extends UrlFunction,
+	H extends HeadersFunction = undefined,
+	I extends Schema.Schema<any> = never,
+	O extends OutputFunction = never,
+	E extends ErrorFunction = never
 >(spec: Route<M, U, H, I, O, E>) {
-  const getHeaders = (params: MakerParams<U, H, I>) =>
-    Effect.gen(function* () {
-      if (!spec.headers) return;
+	const getHeaders = (params: MakerParams<U, H, I>) =>
+		Effect.gen(function* () {
+			if (!spec.headers) return
 
-      if (typeof spec.headers === "function" && params && "headers" in params)
-        return yield* spec.headers(params.headers);
+			if (typeof spec.headers === "function" && params && "headers" in params)
+				return yield* spec.headers(params.headers)
 
-      return spec.headers as Headers.Headers;
-    }) as Effect.Effect<
-      Headers | undefined,
-      InferEffectError<H>,
-      InferEffectRequirements<H>
-    >;
+			return spec.headers as Headers.Headers
+		}) as Effect.Effect<Headers | undefined, InferEffectError<H>, InferEffectRequirements<H>>
 
-  const parseResponse = (
-    schema: Schema.Schema<any>,
-    response: HttpClientResponse.HttpClientResponse
-  ) =>
-    Effect.gen(function* () {
-      const json = yield* response.json;
+	const parseResponse = (schema: Schema.Schema<any>, response: HttpClientResponse.HttpClientResponse) =>
+		Effect.gen(function* () {
+			const json = yield* response.json
 
-      return yield* Schema.parseJson(schema).pipe(Schema.decodeUnknown)(json);
-    });
+			return yield* Schema.parseJson(schema).pipe(Schema.decodeUnknown)(json)
+		})
 
-  const getResponse = (
-    getter: O | undefined,
-    response: HttpClientResponse.HttpClientResponse
-  ) =>
-    Effect.gen(function* () {
-      if (!getter) return response;
+	const getResponse = (getter: O | undefined, response: HttpClientResponse.HttpClientResponse) =>
+		Effect.gen(function* () {
+			if (!getter) return response
 
-      if (typeof getter === "function") return yield* getter(response);
+			if (typeof getter === "function") return yield* getter(response)
 
-      return yield* parseResponse(getter, response);
-    }) as Effect.Effect<
-      InferOutput<O>,
-      InferEffectError<O> | InferEffectError<typeof parseResponse>,
-      InferEffectRequirements<O> | InferEffectRequirements<typeof parseResponse>
-    >;
+			return yield* parseResponse(getter, response)
+		}) as Effect.Effect<
+			InferOutput<O>,
+			InferEffectError<O> | InferEffectError<typeof parseResponse>,
+			InferEffectRequirements<O> | InferEffectRequirements<typeof parseResponse>
+		>
 
-  type InferResponseError<T extends ErrorFunction> =
-    T extends Schema.Schema<any>
-      ? Schema.Schema.Type<T>
-      : T extends (res: HttpClientResponse.HttpClientResponse) => any
-      ? ReturnType<T>
-      : never;
+	type InferResponseError<T extends ErrorFunction> = T extends Schema.Schema<any>
+		? Schema.Schema.Type<T>
+		: T extends (res: HttpClientResponse.HttpClientResponse) => any
+		? ReturnType<T>
+		: never
 
-  const getError = (
-    getter: E,
-    response: HttpClientResponse.HttpClientResponse
-  ) =>
-    Effect.gen(function* () {
-      if (typeof getter === "function")
-        return yield* Effect.fail(getter(response));
+	const getError = (getter: E, response: HttpClientResponse.HttpClientResponse) =>
+		Effect.gen(function* () {
+			if (typeof getter === "function") return yield* Effect.fail(getter(response))
 
-      const error = yield* parseResponse(getter, response);
+			const error = yield* parseResponse(getter, response)
 
-      yield* Effect.fail(error);
-    }) as Effect.Effect<
-      never,
-      InferResponseError<E> | InferEffectError<typeof parseResponse>,
-      InferEffectRequirements<typeof parseResponse>
-    >;
+			yield* Effect.fail(error)
+		}) as Effect.Effect<
+			never,
+			InferResponseError<E> | InferEffectError<typeof parseResponse>,
+			InferEffectRequirements<typeof parseResponse>
+		>
 
-  return (params: MakerParams<U, H, I>) =>
-    Effect.gen(function* () {
-      const url =
-        typeof spec.url === "function" && params && "url" in params
-          ? spec.url(params.url)
-          : (spec.url as string);
+	return (params: MakerParams<U, H, I>) =>
+		Effect.gen(function* () {
+			const url =
+				typeof spec.url === "function" && params && "url" in params
+					? spec.url(params.url)
+					: (spec.url as string)
 
-      const headers = yield* getHeaders(params);
+			const headers = yield* getHeaders(params)
 
-      const bodyJson =
-        spec.body && params && "body" in params
-          ? yield* Schema.encode(spec.body)(params.body).pipe(HttpBody.json)
-          : undefined;
+			const bodyJson =
+				spec.body && params && "body" in params
+					? yield* Schema.encode(spec.body)(params.body).pipe(HttpBody.json)
+					: undefined
 
-      const request = HttpClientRequest.make(spec.method)(url).pipe(
-        (req) => (headers ? HttpClientRequest.setHeaders(req, headers) : req),
-        (req) => (bodyJson ? HttpClientRequest.setBody(req, bodyJson) : req)
-      );
+			const request = HttpClientRequest.make(spec.method)(url).pipe(
+				(req) => (headers ? HttpClientRequest.setHeaders(req, headers) : req),
+				(req) => (bodyJson ? HttpClientRequest.setBody(req, bodyJson) : req)
+			)
 
-      const client = (yield* HttpClient.HttpClient).pipe((client) =>
-        !spec.filterStatusOk ? client : HttpClient.filterStatusOk(client)
-      );
+			const client = (yield* HttpClient.HttpClient).pipe((client) =>
+				!spec.filterStatusOk ? client : HttpClient.filterStatusOk(client)
+			)
 
-      const response = yield* client.execute(request);
+			const response = yield* client.execute(request)
 
-      if (
-        !spec.filterStatusOk &&
-        spec.error &&
-        (response.status < 200 || response.status >= 300)
-      )
-        yield* getError(spec.error, response);
+			if (!spec.filterStatusOk && spec.error && (response.status < 200 || response.status >= 300))
+				yield* getError(spec.error, response)
 
-      return yield* getResponse(spec.response, response);
-    });
+			return yield* getResponse(spec.response, response)
+		})
 }
 
 /**
@@ -516,13 +471,13 @@ export function make<
  * ```
  */
 export const get = <
-  U extends UrlFunction,
-  H extends HeadersFunction = undefined,
-  O extends OutputFunction = never,
-  E extends ErrorFunction = never
+	U extends UrlFunction,
+	H extends HeadersFunction = undefined,
+	O extends OutputFunction = never,
+	E extends ErrorFunction = never
 >(
-  spec: Omit<Route<"GET", U, H, never, O, E>, "method" | "body" | "_tag">
-) => make(new Route({ ...spec, method: "GET" }));
+	spec: Omit<Route<"GET", U, H, never, O, E>, "method" | "body" | "_tag">
+) => make(new Route({ ...spec, method: "GET" }))
 
 /**
  * Creates a type-safe POST request handler.
@@ -598,14 +553,14 @@ export const get = <
  * ```
  */
 export const post = <
-  U extends UrlFunction,
-  H extends HeadersFunction = undefined,
-  I extends Schema.Schema<any> = never,
-  O extends OutputFunction = never,
-  E extends ErrorFunction = never
+	U extends UrlFunction,
+	H extends HeadersFunction = undefined,
+	I extends Schema.Schema<any> = never,
+	O extends OutputFunction = never,
+	E extends ErrorFunction = never
 >(
-  spec: Omit<Route<"POST", U, H, I, O, E>, "method" | "_tag">
-) => make(new Route({ ...spec, method: "POST" }));
+	spec: Omit<Route<"POST", U, H, I, O, E>, "method" | "_tag">
+) => make(new Route({ ...spec, method: "POST" }))
 
 /**
  * Creates a type-safe PUT request handler.
@@ -665,14 +620,14 @@ export const post = <
  * ```
  */
 export const put = <
-  U extends UrlFunction,
-  H extends HeadersFunction = undefined,
-  I extends Schema.Schema<any> = never,
-  O extends OutputFunction = never,
-  E extends ErrorFunction = never
+	U extends UrlFunction,
+	H extends HeadersFunction = undefined,
+	I extends Schema.Schema<any> = never,
+	O extends OutputFunction = never,
+	E extends ErrorFunction = never
 >(
-  spec: Omit<Route<"PUT", U, H, I, O, E>, "method" | "_tag">
-) => make(new Route({ ...spec, method: "PUT" }));
+	spec: Omit<Route<"PUT", U, H, I, O, E>, "method" | "_tag">
+) => make(new Route({ ...spec, method: "PUT" }))
 
 /**
  * Creates a type-safe DELETE request handler.
@@ -739,14 +694,14 @@ export const put = <
  * ```
  */
 export const del = <
-  U extends UrlFunction,
-  H extends HeadersFunction = undefined,
-  I extends Schema.Schema<any> = never,
-  O extends OutputFunction = never,
-  E extends ErrorFunction = never
+	U extends UrlFunction,
+	H extends HeadersFunction = undefined,
+	I extends Schema.Schema<any> = never,
+	O extends OutputFunction = never,
+	E extends ErrorFunction = never
 >(
-  spec: Omit<Route<"DELETE", U, H, I, O, E>, "method" | "_tag">
-) => make(new Route({ ...spec, method: "DELETE" }));
+	spec: Omit<Route<"DELETE", U, H, I, O, E>, "method" | "_tag">
+) => make(new Route({ ...spec, method: "DELETE" }))
 
 /**
  * A client instance that provides default headers and error handling for all routes created from it.
@@ -873,332 +828,332 @@ export const del = <
  * ```
  */
 export class Client<
-  DefaultHeaders extends HeadersFunction = undefined,
-  DefaultError extends ErrorFunction = never
+	DefaultHeaders extends HeadersFunction = undefined,
+	DefaultError extends ErrorFunction = never
 > extends Data.TaggedClass("@HttpApiClient/Client")<{
-  headers?: DefaultHeaders;
-  error?: DefaultError;
+	headers?: DefaultHeaders
+	error?: DefaultError
 }> {
-  /**
-   * Creates a type-safe GET request handler that inherits the client's default headers and error handler.
-   *
-   * GET requests cannot have a body, so the `body` property is omitted from the spec.
-   * The route will automatically use the client's default headers and error handler unless overridden.
-   *
-   * @template U - The URL function type (string or function)
-   * @template H - The headers function type (defaults to DefaultHeaders from the client)
-   * @template O - The output/response handler type
-   * @template E - The error handler type (defaults to DefaultError from the client)
-   *
-   * @param spec - Route specification without method, body, and _tag (method is set to "GET")
-   * @returns A function that executes the GET request and returns an Effect
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   * import { ApiError } from "@/lib/app-error"
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   error: ApiError,
-   * })
-   *
-   * // Inherits the default error handler from the client
-   * const getTodo = apiClient.get({
-   *   url: (params: { id: string }) => `/todos/${params.id}`,
-   *   response: Todo,
-   * })
-   *
-   * const program = Effect.gen(function* () {
-   *   const todo = yield* getTodo({ url: { id: "123" } })
-   *   return todo
-   * })
-   * ```
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   * import { Headers } from "@effect/platform"
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   headers: Headers.fromInput({ Accept: "application/json" }),
-   * })
-   *
-   * // Inherits default headers from the client
-   * const getTodos = apiClient.get({
-   *   url: "/todos",
-   *   response: Todo.pipe(Schema.Array),
-   * })
-   *
-   * const program = Effect.gen(function* () {
-   *   const todos = yield* getTodos()
-   *   return todos
-   * })
-   * ```
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   error: ApiError,
-   * })
-   *
-   * // Override the default error handler for this specific route
-   * const getPublicData = apiClient.get({
-   *   url: "/public/data",
-   *   response: Schema.String,
-   *   error: (res: HttpClientResponse.HttpClientResponse) =>
-   *     new CustomError({ message: "Public endpoint failed" }),
-   * })
-   * ```
-   */
-  get = <
-    U extends UrlFunction,
-    H extends HeadersFunction = DefaultHeaders,
-    O extends OutputFunction = never,
-    E extends ErrorFunction = DefaultError
-  >(
-    spec: Omit<Route<"GET", U, H, never, O, E>, "method" | "body" | "_tag">
-  ) =>
-    make(
-      new Route({
-        headers: this.headers,
-        error: this.error,
-        ...spec,
-        method: "GET",
-      }) as Route<"GET", U, H, never, O, E>
-    );
+	/**
+	 * Creates a type-safe GET request handler that inherits the client's default headers and error handler.
+	 *
+	 * GET requests cannot have a body, so the `body` property is omitted from the spec.
+	 * The route will automatically use the client's default headers and error handler unless overridden.
+	 *
+	 * @template U - The URL function type (string or function)
+	 * @template H - The headers function type (defaults to DefaultHeaders from the client)
+	 * @template O - The output/response handler type
+	 * @template E - The error handler type (defaults to DefaultError from the client)
+	 *
+	 * @param spec - Route specification without method, body, and _tag (method is set to "GET")
+	 * @returns A function that executes the GET request and returns an Effect
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 * import { ApiError } from "@/lib/app-error"
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   error: ApiError,
+	 * })
+	 *
+	 * // Inherits the default error handler from the client
+	 * const getTodo = apiClient.get({
+	 *   url: (params: { id: string }) => `/todos/${params.id}`,
+	 *   response: Todo,
+	 * })
+	 *
+	 * const program = Effect.gen(function* () {
+	 *   const todo = yield* getTodo({ url: { id: "123" } })
+	 *   return todo
+	 * })
+	 * ```
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 * import { Headers } from "@effect/platform"
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   headers: Headers.fromInput({ Accept: "application/json" }),
+	 * })
+	 *
+	 * // Inherits default headers from the client
+	 * const getTodos = apiClient.get({
+	 *   url: "/todos",
+	 *   response: Todo.pipe(Schema.Array),
+	 * })
+	 *
+	 * const program = Effect.gen(function* () {
+	 *   const todos = yield* getTodos()
+	 *   return todos
+	 * })
+	 * ```
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   error: ApiError,
+	 * })
+	 *
+	 * // Override the default error handler for this specific route
+	 * const getPublicData = apiClient.get({
+	 *   url: "/public/data",
+	 *   response: Schema.String,
+	 *   error: (res: HttpClientResponse.HttpClientResponse) =>
+	 *     new CustomError({ message: "Public endpoint failed" }),
+	 * })
+	 * ```
+	 */
+	get = <
+		U extends UrlFunction,
+		H extends HeadersFunction = DefaultHeaders,
+		O extends OutputFunction = never,
+		E extends ErrorFunction = DefaultError
+	>(
+		spec: Omit<Route<"GET", U, H, never, O, E>, "method" | "body" | "_tag">
+	) =>
+		make(
+			new Route({
+				headers: this.headers,
+				error: this.error,
+				...spec,
+				method: "GET",
+			}) as Route<"GET", U, H, never, O, E>
+		)
 
-  /**
-   * Creates a type-safe POST request handler that inherits the client's default headers and error handler.
-   *
-   * POST requests can include a body schema for request validation and encoding.
-   * The route will automatically use the client's default headers and error handler unless overridden.
-   *
-   * @template U - The URL function type (string or function)
-   * @template H - The headers function type (defaults to DefaultHeaders from the client)
-   * @template I - The input body schema type
-   * @template O - The output/response handler type
-   * @template E - The error handler type (defaults to DefaultError from the client)
-   *
-   * @param spec - Route specification without method and _tag (method is set to "POST")
-   * @returns A function that executes the POST request and returns an Effect
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   * import { ApiError } from "@/lib/app-error"
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   error: ApiError,
-   * })
-   *
-   * // Inherits the default error handler from the client
-   * const createTodo = apiClient.post({
-   *   url: "/todos",
-   *   body: NewTodo,
-   *   response: Todo,
-   * })
-   *
-   * const program = Effect.gen(function* () {
-   *   const todo = yield* createTodo({ body: { title: "New Todo", description: "Description" } })
-   *   return todo
-   * })
-   * ```
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   * import { Headers, Effect } from "@effect/platform"
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   headers: (params: { contentType: string }) =>
-   *     Effect.succeed(Headers.fromInput({ "Content-Type": params.contentType })),
-   * })
-   *
-   * // Inherits default dynamic headers from the client
-   * const createTodo = apiClient.post({
-   *   url: "/todos",
-   *   body: NewTodo,
-   *   response: Todo,
-   * })
-   *
-   * const program = Effect.gen(function* () {
-   *   const todo = yield* createTodo({
-   *     headers: { contentType: "application/json" },
-   *     body: { title: "New Todo", description: "Description" },
-   *   })
-   *   return todo
-   * })
-   * ```
-   */
-  post = <
-    U extends UrlFunction,
-    H extends HeadersFunction = DefaultHeaders,
-    I extends Schema.Schema<any> = never,
-    O extends OutputFunction = never,
-    E extends ErrorFunction = DefaultError
-  >(
-    spec: Omit<Route<"POST", U, H, I, O, E>, "method" | "_tag">
-  ) =>
-    make(
-      new Route({
-        headers: this.headers,
-        error: this.error,
-        ...spec,
-        method: "POST",
-      }) as Route<"POST", U, H, I, O, E>
-    );
+	/**
+	 * Creates a type-safe POST request handler that inherits the client's default headers and error handler.
+	 *
+	 * POST requests can include a body schema for request validation and encoding.
+	 * The route will automatically use the client's default headers and error handler unless overridden.
+	 *
+	 * @template U - The URL function type (string or function)
+	 * @template H - The headers function type (defaults to DefaultHeaders from the client)
+	 * @template I - The input body schema type
+	 * @template O - The output/response handler type
+	 * @template E - The error handler type (defaults to DefaultError from the client)
+	 *
+	 * @param spec - Route specification without method and _tag (method is set to "POST")
+	 * @returns A function that executes the POST request and returns an Effect
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 * import { ApiError } from "@/lib/app-error"
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   error: ApiError,
+	 * })
+	 *
+	 * // Inherits the default error handler from the client
+	 * const createTodo = apiClient.post({
+	 *   url: "/todos",
+	 *   body: NewTodo,
+	 *   response: Todo,
+	 * })
+	 *
+	 * const program = Effect.gen(function* () {
+	 *   const todo = yield* createTodo({ body: { title: "New Todo", description: "Description" } })
+	 *   return todo
+	 * })
+	 * ```
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 * import { Headers, Effect } from "@effect/platform"
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   headers: (params: { contentType: string }) =>
+	 *     Effect.succeed(Headers.fromInput({ "Content-Type": params.contentType })),
+	 * })
+	 *
+	 * // Inherits default dynamic headers from the client
+	 * const createTodo = apiClient.post({
+	 *   url: "/todos",
+	 *   body: NewTodo,
+	 *   response: Todo,
+	 * })
+	 *
+	 * const program = Effect.gen(function* () {
+	 *   const todo = yield* createTodo({
+	 *     headers: { contentType: "application/json" },
+	 *     body: { title: "New Todo", description: "Description" },
+	 *   })
+	 *   return todo
+	 * })
+	 * ```
+	 */
+	post = <
+		U extends UrlFunction,
+		H extends HeadersFunction = DefaultHeaders,
+		I extends Schema.Schema<any> = never,
+		O extends OutputFunction = never,
+		E extends ErrorFunction = DefaultError
+	>(
+		spec: Omit<Route<"POST", U, H, I, O, E>, "method" | "_tag">
+	) =>
+		make(
+			new Route({
+				headers: this.headers,
+				error: this.error,
+				...spec,
+				method: "POST",
+			}) as Route<"POST", U, H, I, O, E>
+		)
 
-  /**
-   * Creates a type-safe PUT request handler that inherits the client's default headers and error handler.
-   *
-   * PUT requests can include a body schema for request validation and encoding.
-   * Typically used for updating existing resources.
-   * The route will automatically use the client's default headers and error handler unless overridden.
-   *
-   * @template U - The URL function type (string or function)
-   * @template H - The headers function type (defaults to DefaultHeaders from the client)
-   * @template I - The input body schema type
-   * @template O - The output/response handler type
-   * @template E - The error handler type (defaults to DefaultError from the client)
-   *
-   * @param spec - Route specification without method and _tag (method is set to "PUT")
-   * @returns A function that executes the PUT request and returns an Effect
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   * import { ApiError } from "@/lib/app-error"
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   error: ApiError,
-   * })
-   *
-   * // Inherits the default error handler from the client
-   * const updateTodo = apiClient.put({
-   *   url: (params: { id: string }) => `/todos/${params.id}`,
-   *   body: Todo,
-   *   response: Todo,
-   * })
-   *
-   * const program = Effect.gen(function* () {
-   *   const updatedTodo = yield* updateTodo({
-   *     url: { id: "123" },
-   *     body: { id: "123", title: "Updated", description: "Updated", completed: true },
-   *   })
-   *   return updatedTodo
-   * })
-   * ```
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   headers: Headers.fromInput({ "X-API-Version": "v2" }),
-   * })
-   *
-   * // Inherits default headers from the client
-   * const updateTodo = apiClient.put({
-   *   url: (params: { id: string }) => `/todos/${params.id}`,
-   *   body: Todo,
-   *   response: Todo,
-   * })
-   * ```
-   */
-  put = <
-    U extends UrlFunction,
-    H extends HeadersFunction = DefaultHeaders,
-    I extends Schema.Schema<any> = never,
-    O extends OutputFunction = never,
-    E extends ErrorFunction = DefaultError
-  >(
-    spec: Omit<Route<"PUT", U, H, I, O, E>, "method" | "_tag">
-  ) =>
-    make(
-      new Route({
-        headers: this.headers,
-        error: this.error,
-        ...spec,
-        method: "PUT",
-      }) as Route<"PUT", U, H, I, O, E>
-    );
+	/**
+	 * Creates a type-safe PUT request handler that inherits the client's default headers and error handler.
+	 *
+	 * PUT requests can include a body schema for request validation and encoding.
+	 * Typically used for updating existing resources.
+	 * The route will automatically use the client's default headers and error handler unless overridden.
+	 *
+	 * @template U - The URL function type (string or function)
+	 * @template H - The headers function type (defaults to DefaultHeaders from the client)
+	 * @template I - The input body schema type
+	 * @template O - The output/response handler type
+	 * @template E - The error handler type (defaults to DefaultError from the client)
+	 *
+	 * @param spec - Route specification without method and _tag (method is set to "PUT")
+	 * @returns A function that executes the PUT request and returns an Effect
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 * import { ApiError } from "@/lib/app-error"
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   error: ApiError,
+	 * })
+	 *
+	 * // Inherits the default error handler from the client
+	 * const updateTodo = apiClient.put({
+	 *   url: (params: { id: string }) => `/todos/${params.id}`,
+	 *   body: Todo,
+	 *   response: Todo,
+	 * })
+	 *
+	 * const program = Effect.gen(function* () {
+	 *   const updatedTodo = yield* updateTodo({
+	 *     url: { id: "123" },
+	 *     body: { id: "123", title: "Updated", description: "Updated", completed: true },
+	 *   })
+	 *   return updatedTodo
+	 * })
+	 * ```
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   headers: Headers.fromInput({ "X-API-Version": "v2" }),
+	 * })
+	 *
+	 * // Inherits default headers from the client
+	 * const updateTodo = apiClient.put({
+	 *   url: (params: { id: string }) => `/todos/${params.id}`,
+	 *   body: Todo,
+	 *   response: Todo,
+	 * })
+	 * ```
+	 */
+	put = <
+		U extends UrlFunction,
+		H extends HeadersFunction = DefaultHeaders,
+		I extends Schema.Schema<any> = never,
+		O extends OutputFunction = never,
+		E extends ErrorFunction = DefaultError
+	>(
+		spec: Omit<Route<"PUT", U, H, I, O, E>, "method" | "_tag">
+	) =>
+		make(
+			new Route({
+				headers: this.headers,
+				error: this.error,
+				...spec,
+				method: "PUT",
+			}) as Route<"PUT", U, H, I, O, E>
+		)
 
-  /**
-   * Creates a type-safe DELETE request handler that inherits the client's default headers and error handler.
-   *
-   * DELETE requests can optionally include a body schema, though it's uncommon.
-   * When no response schema or function is provided, the raw HttpClientResponse is returned.
-   * The route will automatically use the client's default headers and error handler unless overridden.
-   *
-   * @template U - The URL function type (string or function)
-   * @template H - The headers function type (defaults to DefaultHeaders from the client)
-   * @template I - The input body schema type (optional, rarely used for DELETE)
-   * @template O - The output/response handler type
-   * @template E - The error handler type (defaults to DefaultError from the client)
-   *
-   * @param spec - Route specification without method and _tag (method is set to "DELETE")
-   * @returns A function that executes the DELETE request and returns an Effect
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   * import { ApiError } from "@/lib/app-error"
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   error: ApiError,
-   * })
-   *
-   * // Inherits the default error handler from the client
-   * const deleteTodo = apiClient.del({
-   *   url: (params: { id: string }) => `/todos/${params.id}`,
-   * })
-   *
-   * const program = Effect.gen(function* () {
-   *   const response = yield* deleteTodo({ url: { id: "123" } })
-   *   yield* Console.log("Status:", response.status)
-   *   return response
-   * })
-   * ```
-   *
-   * @example
-   * ```ts
-   * import { HttpApiClient } from "."
-   *
-   * const apiClient = new HttpApiClient.Client({
-   *   headers: Headers.fromInput({ "X-API-Version": "v2" }),
-   * })
-   *
-   * // Inherits default headers from the client
-   * const deleteTodo = apiClient.del({
-   *   url: (params: { id: string }) => `/todos/${params.id}`,
-   *   response: Schema.Object({ deleted: Schema.Boolean }),
-   * })
-   *
-   * const program = Effect.gen(function* () {
-   *   const result = yield* deleteTodo({ url: { id: "123" } })
-   *   return result
-   * })
-   * ```
-   */
-  del = <
-    U extends UrlFunction,
-    H extends HeadersFunction = DefaultHeaders,
-    I extends Schema.Schema<any> = never,
-    O extends OutputFunction = never,
-    E extends ErrorFunction = DefaultError
-  >(
-    spec: Omit<Route<"DELETE", U, H, I, O, E>, "method" | "_tag">
-  ) =>
-    make(
-      new Route({
-        headers: this.headers,
-        error: this.error,
-        ...spec,
-        method: "DELETE",
-      }) as Route<"DELETE", U, H, I, O, E>
-    );
+	/**
+	 * Creates a type-safe DELETE request handler that inherits the client's default headers and error handler.
+	 *
+	 * DELETE requests can optionally include a body schema, though it's uncommon.
+	 * When no response schema or function is provided, the raw HttpClientResponse is returned.
+	 * The route will automatically use the client's default headers and error handler unless overridden.
+	 *
+	 * @template U - The URL function type (string or function)
+	 * @template H - The headers function type (defaults to DefaultHeaders from the client)
+	 * @template I - The input body schema type (optional, rarely used for DELETE)
+	 * @template O - The output/response handler type
+	 * @template E - The error handler type (defaults to DefaultError from the client)
+	 *
+	 * @param spec - Route specification without method and _tag (method is set to "DELETE")
+	 * @returns A function that executes the DELETE request and returns an Effect
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 * import { ApiError } from "@/lib/app-error"
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   error: ApiError,
+	 * })
+	 *
+	 * // Inherits the default error handler from the client
+	 * const deleteTodo = apiClient.del({
+	 *   url: (params: { id: string }) => `/todos/${params.id}`,
+	 * })
+	 *
+	 * const program = Effect.gen(function* () {
+	 *   const response = yield* deleteTodo({ url: { id: "123" } })
+	 *   yield* Console.log("Status:", response.status)
+	 *   return response
+	 * })
+	 * ```
+	 *
+	 * @example
+	 * ```ts
+	 * import { HttpApiClient } from "."
+	 *
+	 * const apiClient = new HttpApiClient.Client({
+	 *   headers: Headers.fromInput({ "X-API-Version": "v2" }),
+	 * })
+	 *
+	 * // Inherits default headers from the client
+	 * const deleteTodo = apiClient.del({
+	 *   url: (params: { id: string }) => `/todos/${params.id}`,
+	 *   response: Schema.Object({ deleted: Schema.Boolean }),
+	 * })
+	 *
+	 * const program = Effect.gen(function* () {
+	 *   const result = yield* deleteTodo({ url: { id: "123" } })
+	 *   return result
+	 * })
+	 * ```
+	 */
+	del = <
+		U extends UrlFunction,
+		H extends HeadersFunction = DefaultHeaders,
+		I extends Schema.Schema<any> = never,
+		O extends OutputFunction = never,
+		E extends ErrorFunction = DefaultError
+	>(
+		spec: Omit<Route<"DELETE", U, H, I, O, E>, "method" | "_tag">
+	) =>
+		make(
+			new Route({
+				headers: this.headers,
+				error: this.error,
+				...spec,
+				method: "DELETE",
+			}) as Route<"DELETE", U, H, I, O, E>
+		)
 }
 
 // services & layers
@@ -1243,8 +1198,8 @@ export class Client<
  * ```
  */
 export class Config extends Context.Tag("@HttpApiClient/Config")<
-  Config,
-  { url: string; accessToken: string | undefined }
+	Config,
+	{ url: string; accessToken: string | undefined }
 >() {}
 
 /**
@@ -1310,25 +1265,21 @@ export class Config extends Context.Tag("@HttpApiClient/Config")<
  * ```
  */
 export const layer = Layer.effect(
-  HttpClient.HttpClient,
-  Effect.gen(function* () {
-    const config = yield* Config;
+	HttpClient.HttpClient,
+	Effect.gen(function* () {
+		const config = yield* Config
 
-    const client = (yield* HttpClient.HttpClient).pipe(
-      // set the base url to the request url if it starts with a slash
-      HttpClient.mapRequestInput((req) =>
-        req.url.startsWith("/")
-          ? req.pipe(HttpClientRequest.setUrl(config.url + req.url))
-          : req
-      ),
-      // set the bearer token to the request headers if the session is present
-      HttpClient.mapRequestInput((req) =>
-        config.accessToken
-          ? req.pipe(HttpClientRequest.bearerToken(config.accessToken))
-          : req
-      )
-    );
+		const client = (yield* HttpClient.HttpClient).pipe(
+			// set the base url to the request url if it starts with a slash
+			HttpClient.mapRequestInput((req) =>
+				req.url.startsWith("/") ? req.pipe(HttpClientRequest.setUrl(config.url + req.url)) : req
+			),
+			// set the bearer token to the request headers if the session is present
+			HttpClient.mapRequestInput((req) =>
+				config.accessToken ? req.pipe(HttpClientRequest.bearerToken(config.accessToken)) : req
+			)
+		)
 
-    return client;
-  })
-);
+		return client
+	})
+)

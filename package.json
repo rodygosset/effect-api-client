@@ -1,16 +1,16 @@
 {
-  "name": "http-api-client",
-  "module": "index.ts",
-  "type": "module",
-  "private": true,
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5"
-  },
-  "dependencies": {
-    "@effect/platform": "^0.93.4",
-    "effect": "^3.19.7"
-  }
+	"name": "http-api-client",
+	"module": "index.ts",
+	"type": "module",
+	"private": true,
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5"
+	},
+	"dependencies": {
+		"@effect/platform": "^0.93.4",
+		"effect": "^3.19.7"
+	}
 }
