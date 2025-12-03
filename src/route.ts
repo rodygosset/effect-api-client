@@ -19,16 +19,14 @@ import type { Error } from "./error"
  *
  * @example
  * ```ts
- * import { Route } from "./route"
- * import { value } from "./url"
- * import { schema } from "./output"
+ * import { Route, Url, Output } from "rest-api-client"
  * import { Schema } from "effect"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
- * const route = new Route({
+ * const route = new Route.Route({
  *   method: "GET",
- *   url: value("/todos/1"),
- *   response: schema(Todo)
+ *   url: Url.value("/todos/1"),
+ *   response: Output.schema(Todo)
  * })
  * ```
  */
