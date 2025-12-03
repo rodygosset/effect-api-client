@@ -3,9 +3,9 @@ import { HttpBody } from "@effect/platform"
 import type { MakerSchema } from "./common"
 
 /**
- * Represents a static body value with its schema.
+ * Represents a static body value with its serialization schema.
  *
- * @template T - Schema type for the body value
+ * @template T - Effect Schema type for the body value
  */
 export class Value<T extends MakerSchema = MakerSchema> extends Data.TaggedClass("@RestApiClient/Input/Value")<{
 	schema: T
@@ -15,10 +15,10 @@ export class Value<T extends MakerSchema = MakerSchema> extends Data.TaggedClass
 /**
  * Creates a static body value.
  *
- * @template T - Schema type for the body value
- * @param schema - Schema to validate the body value
+ * @template T - Effect Schema type for the body value
+ * @param schema - Effect Schema to validate the body value
  * @param value - Static body value conforming to the schema
- * @returns A Value instance with the schema and value
+ * @returns Internal representation of a static body value with its serialization schema
  *
  * @example
  * ```ts
@@ -77,8 +77,8 @@ export class Fn<T extends MakerInputFn = MakerInputFn> extends Data.TaggedClass(
  * Creates a custom body encoder function.
  *
  * @template T - Body encoding function type
- * @param fn - Function that takes body parameters and returns an Effect producing HttpBody
- * @returns A Fn body encoder instance
+ * @param fn - Function that takes body parameters and returns an Effect producing an HttpBody
+ * @returns Internal representation of a function that encodes a body
  *
  * @example
  * ```ts
@@ -103,7 +103,7 @@ export const fn = <T extends MakerInputFn>(fn: T) => new Fn({ fn })
 export type Input = Value | Schema | Fn
 
 /**
- * Union type for body makers: static Value, Schema, or Effect function.
+ * Union type for request body: static Value, Schema, or custom encoding function.
  *
  * @example
  * ```ts
@@ -121,7 +121,7 @@ export type MakerInput = Value | MakerSchema | MakerInputFn
 /**
  * Converts a MakerInput to its internal representation.
  *
- * @template I - Input maker type
+ * @template I - MakerInput (static Value, Schema, or custom encoding function)
  */
 export type ToInput<I extends MakerInput> = I extends Value
 	? I
@@ -134,8 +134,8 @@ export type ToInput<I extends MakerInput> = I extends Value
 /**
  * Converts a MakerInput to its internal Route representation.
  *
- * @template I - Input maker type
- * @param input - Input maker (Value, Schema, or function)
+ * @template I - Generic input type (extends MakerInput)
+ * @param input - MakerInput (static Value, Schema, or custom encoding function)
  * @returns Internal input representation
  *
  * @example

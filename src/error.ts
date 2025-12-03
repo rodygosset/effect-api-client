@@ -1,21 +1,21 @@
-import { Effect, Data, Schema as S } from "effect"
+import { Data, Schema as S } from "effect"
 import { HttpClientResponse } from "@effect/platform"
 import type { MakerSchema } from "./common"
 
 /**
- * Error parser that parses error responses using a Schema.
+ * An Effect Schema used to parse error responses.
  *
- * @template T - Schema type for error parsing
+ * @template T - Effect Schema type
  */
 export class Schema<T extends MakerSchema = MakerSchema> extends Data.TaggedClass("@RestApiClient/Error/Schema")<{
 	schema: T
 }> {}
 
 /**
- * Creates an error parser from a Schema.
+ * Creates a Schema error parser.
  *
- * @template T - Schema type for error parsing
- * @param schema - Schema to use for parsing error responses
+ * @template T - Effect Schema type
+ * @param schema - Effect Schema to use for parsing error responses
  * @returns A Schema error parser instance
  *
  * @example

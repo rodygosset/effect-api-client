@@ -28,11 +28,6 @@ import { Route } from "./route"
 export type MakerUrlParams<U extends MakerUrl> = U extends MakerUrlFn ? { url: Parameters<U>[0] } : {}
 
 /**
- * Default headers type used when no headers are specified.
- */
-export type DefaultMakerHeaders = Headers.Headers
-
-/**
  * Extracts header parameters from a MakerHeaders type.
  *
  * @template H - Headers maker type
@@ -48,7 +43,9 @@ export type DefaultMakerHeaders = Headers.Headers
  * // Params = { headers: { apiKey: string } }
  * ```
  */
-export type MakerHeadersParams<H extends MakerHeaders = DefaultMakerHeaders> = H extends MakerHeadersFn
+export type MakerHeadersParams<H extends MakerHeaders = never> = [H] extends [never]
+	? {}
+	: H extends MakerHeadersFn
 	? { headers: Parameters<H>[0] }
 	: {}
 
@@ -101,7 +98,7 @@ export type MakerBodyParams<I extends MakerInput = never> = [I] extends [never]
  */
 export type MakerParams<
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never
 > = IsEmptyObject<MakerUrlParams<U> & MakerHeadersParams<H> & MakerBodyParams<I>> extends true
 	? void
@@ -144,7 +141,7 @@ export type MakerParams<
 export function make<
 	M extends HttpMethod,
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -284,7 +281,7 @@ export function make<
 export type MakerSpec<
 	M extends HttpMethod,
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -313,7 +310,7 @@ export type MakerSpec<
 export const toRoute = <
 	M extends HttpMethod,
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -342,7 +339,7 @@ export const toRoute = <
 export type MethodMakerSpec<
 	M extends HttpMethod,
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -368,7 +365,7 @@ export type MethodMakerSpec<
  */
 export type GetMakerSpec<
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
 > = Omit<MethodMakerSpec<"GET", U, H, never, O, E>, "body">
@@ -398,7 +395,7 @@ export type GetMakerSpec<
  */
 export const get = <
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
 >(
@@ -426,7 +423,7 @@ export const get = <
  */
 export type PostMakerSpec<
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -459,7 +456,7 @@ export type PostMakerSpec<
  */
 export const post = <
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -478,7 +475,7 @@ export const post = <
  */
 export type PutMakerSpec<
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -510,7 +507,7 @@ export type PutMakerSpec<
  */
 export const put = <
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -529,7 +526,7 @@ export const put = <
  */
 export type DelMakerSpec<
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never
@@ -559,7 +556,7 @@ export type DelMakerSpec<
  */
 export const del = <
 	U extends MakerUrl,
-	H extends MakerHeaders = DefaultMakerHeaders,
+	H extends MakerHeaders = never,
 	I extends MakerInput = never,
 	O extends MakerOutput = never,
 	E extends MakerError = never

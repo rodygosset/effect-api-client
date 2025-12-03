@@ -3,20 +3,20 @@ import { HttpClientResponse } from "@effect/platform"
 import type { MakerSchema } from "./common"
 
 /**
- * Response parser that parses responses using a Schema.
+ * An Effect Schema used to parse responses.
  *
- * @template T - Schema type for response parsing
+ * @template T - Effect Schema type for response parsing
  */
 export class Schema<T extends MakerSchema = MakerSchema> extends Data.TaggedClass("@RestApiClient/Output/Schema")<{
 	schema: T
 }> {}
 
 /**
- * Creates a response parser from a Schema.
+ * Creates a Schema response parser.
  *
- * @template T - Schema type for response parsing
- * @param schema - Schema to use for parsing responses
- * @returns A Schema response parser instance
+ * @template T - Effect Schema type for response parsing
+ * @param schema - Effect Schema to use for parsing responses
+ * @returns Internal representation of a Schema response parser
  *
  * @example
  * ```ts
@@ -73,7 +73,7 @@ export const fn = <T extends MakerOutputFn>(fn: T) => new Fn({ fn })
 export type Output = Schema | Fn
 
 /**
- * Union type for response parsers: Schema or Effect function.
+ * Union type for response parsers: Schema or custom response processing function.
  *
  * @example
  * ```ts
@@ -91,8 +91,8 @@ export type MakerOutput = MakerSchema | MakerOutputFn
 /**
  * Converts a MakerOutput to its internal Route representation.
  *
- * @template O - Output maker type
- * @param output - Output maker (Schema or function)
+ * @template O - Generic output type (extends MakerOutput)
+ * @param output - MakerOutput (static Schema or custom response processing function)
  * @returns Internal output representation
  *
  * @example
@@ -109,7 +109,7 @@ export const fromMakerOutput = <O extends MakerOutput>(output: O) => (S.isSchema
 /**
  * Converts a MakerOutput to its internal representation.
  *
- * @template O - Output maker type
+ * @template O - Generic output type (extends MakerOutput)
  */
 export type ToOutput<O extends MakerOutput> = O extends MakerSchema
 	? Schema<O>
@@ -120,7 +120,7 @@ export type ToOutput<O extends MakerOutput> = O extends MakerSchema
 /**
  * Infers the output type from a MakerOutput.
  *
- * @template O - Output maker type
+ * @template O - Generic output type (extends MakerOutput)
  * @returns The inferred output type
  *
  * @example

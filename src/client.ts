@@ -18,11 +18,11 @@ import type { MakerInput } from "./input"
  * ```ts
  * import { Headers } from "@effect/platform"
  * import { Schema } from "effect"
- * import { Client } from "./client"
+ * import { Client } from "../src"
  *
- * const Todo = Schema.Struct({ id: Schema.String })
+ * const Todo = Schema.Struct({ id: Schema.String, description: Schema.String, completed: Schema.Boolean })
  * const ErrorSchema = Schema.Struct({ message: Schema.String })
- * const client = new Client({
+ * const client = new Client.Client({
  *   headers: Headers.fromInput({ "X-API-Version": "v1" }),
  *   error: ErrorSchema
  * })
@@ -30,7 +30,7 @@ import type { MakerInput } from "./input"
  * ```
  */
 export class Client<
-	DefaultHeaders extends MakerHeaders = Make.DefaultMakerHeaders,
+	DefaultHeaders extends MakerHeaders = never,
 	DefaultError extends MakerError = never
 > extends Data.TaggedClass("@RestApiClient/Client")<{
 	headers?: DefaultHeaders
@@ -49,10 +49,10 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "./client"
+	 * import { Client } from "../src"
 	 *
 	 * const Todo = Schema.Struct({ id: Schema.String })
-	 * const client = new Client()
+	 * const client = new Client.Client()
 	 * const getTodo = client.get({ url: "/todos/1", response: Todo })
 	 * const test = Effect.gen(function* () {
 	 *   const todo = yield* getTodo()
@@ -83,11 +83,11 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "./client"
+	 * import { Client } from "../src"
 	 *
 	 * const NewTodo = Schema.Struct({ title: Schema.String })
 	 * const Todo = Schema.Struct({ id: Schema.String, title: Schema.String })
-	 * const client = new Client()
+	 * const client = new Client.Client()
 	 * const createTodo = client.post({ url: "/todos", body: NewTodo, response: Todo })
 	 * const test = Effect.gen(function* () {
 	 *   const todo = yield* createTodo({ body: { title: "My Todo" } })
@@ -119,10 +119,10 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "./client"
+	 * import { Client } from "../src"
 	 *
 	 * const UpdateTodo = Schema.Struct({ title: Schema.String })
-	 * const client = new Client()
+	 * const client = new Client.Client()
 	 * const updateTodo = client.put({ url: "/todos/1", body: UpdateTodo })
 	 * const test = Effect.gen(function* () {
 	 *   const todo = yield* updateTodo({ body: { title: "Updated" } })
@@ -154,9 +154,9 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect } from "effect"
-	 * import { Client } from "./client"
+	 * import { Client } from "../src"
 	 *
-	 * const client = new Client()
+	 * const client = new Client.Client()
 	 * const deleteTodo = client.del({ url: "/todos/1" })
 	 * const test = Effect.gen(function* () {
 	 *   yield* deleteTodo()
@@ -181,11 +181,11 @@ export class Client<
  * @example
  * ```ts
  * import { Layer } from "effect"
- * import { Config } from "./client"
+ * import { Client } from "../src"
  *
- * const configLayer = Layer.succeed(Config, {
+ * const configLayer = Layer.succeed(Client.Config, {
  *   url: "https://api.example.com",
- *   accessToken: "token123"
+ *   accessToken: "ey..."
  * })
  * ```
  */
@@ -201,18 +201,19 @@ export class Config extends Context.Tag("@RestApiClient/Config")<
  * @example
  * ```ts
  * import { Effect, Layer } from "effect"
- * import { get } from "./make"
- * import { layer, Config } from "./client"
+ * import { Client } from "../src"
+ * import { FetchHttpClient } from "@effect/platform"
  *
- * const getTodo = get({ url: "/todos/1" })
+ * const getTodo = Client.get({ url: "/todos/1" })
  * const program = Effect.gen(function* () {
  *   const todo = yield* getTodo()
  *   return todo
  * })
  *
+ * const layer = Client.layer.pipe(Layer.provide([FetchHttpClient.layer, Layer.succeed(Config, { url: "https://api.example.com", accessToken: "token" })]))
+ *
  * program.pipe(
  *   Effect.provide(layer),
- *   Effect.provide(Layer.succeed(Config, { url: "https://api.example.com", accessToken: "token" })),
  *   Effect.runPromise
  * )
  * ```

@@ -44,7 +44,7 @@ export class Fn<T extends MakerHeadersFn = MakerHeadersFn> extends Data.TaggedCl
  *
  * @template T - Header computation function type
  * @param fn - Function that takes header parameters and returns an Effect producing Headers
- * @returns A Fn header maker instance
+ * @returns Internal representation of a function that computes headers
  *
  * @example
  * ```ts
@@ -52,7 +52,7 @@ export class Fn<T extends MakerHeadersFn = MakerHeadersFn> extends Data.TaggedCl
  * import { Headers } from "@effect/platform"
  * import { fn } from "./headers"
  *
- * const headers = fn((params: { apiKey: string }) =>
+ * const headerFn = fn((params: { apiKey: string }) =>
  *   Effect.succeed(Headers.fromInput({ "X-API-Key": params.apiKey }))
  * )
  * ```
@@ -65,7 +65,7 @@ export const fn = <T extends MakerHeadersFn>(fn: T) => new Fn({ fn })
 export type Headers = Value | Fn
 
 /**
- * Union type for header makers: static Headers or Effect function.
+ * Union type for header makers: static or dynamic Headers.
  *
  * @example
  * ```ts
@@ -82,7 +82,7 @@ export type MakerHeaders = Headers.Headers | MakerHeadersFn
 /**
  * Converts a MakerHeaders to its internal representation.
  *
- * @template H - Headers maker type
+ * @template H - MakerHeaders (static or dynamic headers)
  */
 export type ToHeaders<H extends MakerHeaders> = H extends Headers.Headers
 	? Value
@@ -93,8 +93,8 @@ export type ToHeaders<H extends MakerHeaders> = H extends Headers.Headers
 /**
  * Converts a MakerHeaders to its internal Route representation.
  *
- * @template H - Headers maker type
- * @param headers - Headers maker (Headers object or function)
+ * @template H - Generic input type
+ * @param headers - MakerHeaders (static or dynamic headers)
  * @returns Internal headers representation
  *
  * @example

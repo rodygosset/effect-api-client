@@ -41,11 +41,11 @@ export class Fn<T extends MakerUrlFn = MakerUrlFn> extends Data.TaggedClass("@Re
 export type MakerUrlFn = (arg: any) => string
 
 /**
- * Creates a dynamic URL function.
+ * Creates the internal representation of a dynamic URL function.
  *
  * @template T - URL generation function type
  * @param fn - Function that takes URL parameters and returns a URL string
- * @returns A Fn URL maker instance
+ * @returns Internal representation of a dynamic URL function
  *
  * @example
  * ```ts
