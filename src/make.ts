@@ -19,7 +19,7 @@ import { Route } from "./route"
  *
  * @example
  * ```ts
- * import type { MakerUrlParams } from "./make"
+ * import type { MakerUrlParams } from "rest-api-client"
  *
  * type Params = MakerUrlParams<(params: { id: string }) => string>
  * // Params = { url: { id: string } }
@@ -35,7 +35,7 @@ export type MakerUrlParams<U extends MakerUrl> = U extends MakerUrlFn ? { url: P
  *
  * @example
  * ```ts
- * import type { MakerHeadersParams } from "./make"
+ * import type { MakerHeadersParams } from "rest-api-client"
  * import type { Effect } from "effect"
  * import type { Headers } from "@effect/platform"
  *
@@ -57,7 +57,7 @@ export type MakerHeadersParams<H extends MakerHeaders = never> = [H] extends [ne
  *
  * @example
  * ```ts
- * import type { MakerBodyParams } from "./make"
+ * import type { MakerBodyParams } from "rest-api-client"
  * import { Schema } from "effect"
  *
  * const Todo = Schema.Struct({ title: Schema.String })
@@ -84,7 +84,7 @@ export type MakerBodyParams<I extends MakerInput = never> = [I] extends [never]
  *
  * @example
  * ```ts
- * import type { MakerParams } from "./make"
+ * import type { MakerParams } from "rest-api-client"
  * import { Schema } from "effect"
  *
  * const Todo = Schema.Struct({ title: Schema.String })
@@ -120,18 +120,10 @@ export type MakerParams<
  * @example
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Route } from "./route"
- * import { value } from "./url"
- * import { schema } from "./output"
- * import { make } from "./make"
+ * import { get } from "rest-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String, title: Schema.String })
- * const route = new Route({
- *   method: "GET",
- *   url: value("/todos/1"),
- *   response: schema(Todo)
- * })
- * const getTodo = make(route)
+ * const getTodo = get({ url: "/todos/1", response: Todo })
  * const test = Effect.gen(function* () {
  *   const todo = yield* getTodo()
  *   return todo
@@ -271,7 +263,7 @@ export function make<
  *
  * @example
  * ```ts
- * import type { MakerSpec } from "./make"
+ * import type { MakerSpec } from "rest-api-client"
  * import { Schema } from "effect"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
@@ -356,7 +348,7 @@ export type MethodMakerSpec<
  *
  * @example
  * ```ts
- * import type { GetMakerSpec } from "./make"
+ * import type { GetMakerSpec } from "rest-api-client"
  * import { Schema } from "effect"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
@@ -383,7 +375,7 @@ export type GetMakerSpec<
  * @example
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { get } from "./make"
+ * import { get } from "rest-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
  * const getTodo = get({ url: "/todos/1", response: Todo })
@@ -413,7 +405,7 @@ export const get = <
  *
  * @example
  * ```ts
- * import type { PostMakerSpec } from "./make"
+ * import type { PostMakerSpec } from "rest-api-client"
  * import { Schema } from "effect"
  *
  * const NewTodo = Schema.Struct({ title: Schema.String })
@@ -443,7 +435,7 @@ export type PostMakerSpec<
  * @example
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { post } from "./make"
+ * import { post } from "rest-api-client"
  *
  * const NewTodo = Schema.Struct({ title: Schema.String })
  * const Todo = Schema.Struct({ id: Schema.String, title: Schema.String })
@@ -495,7 +487,7 @@ export type PutMakerSpec<
  * @example
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { put } from "./make"
+ * import { put } from "rest-api-client"
  *
  * const UpdateTodo = Schema.Struct({ title: Schema.String })
  * const updateTodo = put({ url: "/todos/1", body: UpdateTodo })
@@ -546,7 +538,7 @@ export type DelMakerSpec<
  * @example
  * ```ts
  * import { Effect } from "effect"
- * import { del } from "./make"
+ * import { del } from "rest-api-client"
  *
  * const deleteTodo = del({ url: "/todos/1" })
  * Effect.gen(function* () {

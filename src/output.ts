@@ -21,10 +21,10 @@ export class Schema<T extends MakerSchema = MakerSchema> extends Data.TaggedClas
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { schema } from "./output"
+ * import { Output } from "rest-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String, title: Schema.String })
- * const responseParser = schema(Todo)
+ * const responseParser = Output.schema(Todo)
  * ```
  */
 export const schema = <T extends MakerSchema>(schema: T) => new Schema({ schema })
@@ -55,9 +55,9 @@ export class Fn<T extends MakerOutputFn = MakerOutputFn> extends Data.TaggedClas
  * ```ts
  * import { Effect } from "effect"
  * import { HttpClientResponse } from "@effect/platform"
- * import { fn } from "./output"
+ * import { Output } from "rest-api-client"
  *
- * const responseProcessor = fn((res: HttpClientResponse.HttpClientResponse) =>
+ * const responseProcessor = Output.fn((res: HttpClientResponse.HttpClientResponse) =>
  *   Effect.gen(function* () {
  *     const json = yield* res.json
  *     return { data: json, status: res.status }
@@ -77,13 +77,13 @@ export type Output = Schema | Fn
  *
  * @example
  * ```ts
- * import type { MakerOutput } from "./output"
+ * import type { Output } from "rest-api-client"
  * import { Schema } from "effect"
  * import type { HttpClientResponse } from "@effect/platform"
  * import type { Effect } from "effect"
  *
- * type Output1 = MakerOutput<typeof Schema.Struct({ id: Schema.String })>
- * type Output2 = MakerOutput<(res: HttpClientResponse.HttpClientResponse) => Effect.Effect<any, never, never>>
+ * type Output1 = Output.MakerOutput<typeof Schema.Struct({ id: Schema.String })>
+ * type Output2 = Output.MakerOutput<(res: HttpClientResponse.HttpClientResponse) => Effect.Effect<any, never, never>>
  * ```
  */
 export type MakerOutput = MakerSchema | MakerOutputFn
@@ -98,10 +98,10 @@ export type MakerOutput = MakerSchema | MakerOutputFn
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { fromMakerOutput } from "./output"
+ * import { Output } from "rest-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
- * const outputParser = fromMakerOutput(Todo)
+ * const outputParser = Output.fromMakerOutput(Todo)
  * ```
  */
 export const fromMakerOutput = <O extends MakerOutput>(output: O) => (S.isSchema(output) ? schema(output) : fn(output))
@@ -125,11 +125,11 @@ export type ToOutput<O extends MakerOutput> = O extends MakerSchema
  *
  * @example
  * ```ts
- * import type { InferOutput } from "./output"
+ * import type { Output } from "rest-api-client"
  * import { Schema } from "effect"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
- * type OutputType = InferOutput<typeof Todo>
+ * type OutputType = Output.InferOutput<typeof Todo>
  * // OutputType = { id: string }
  * ```
  */

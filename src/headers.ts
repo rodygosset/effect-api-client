@@ -17,9 +17,9 @@ export class Value extends Data.TaggedClass("@RestApiClient/Headers/Value")<{
  * @example
  * ```ts
  * import { Headers } from "@effect/platform"
- * import { value } from "./headers"
+ * import { Headers as RestApiHeaders } from "rest-api-client"
  *
- * const headers = value(Headers.fromInput({ "Content-Type": "application/json" }))
+ * const headers = RestApiHeaders.value(Headers.fromInput({ "Content-Type": "application/json" }))
  * ```
  */
 export const value = (headers: Headers.Headers) => new Value({ headers })
@@ -50,9 +50,9 @@ export class Fn<T extends MakerHeadersFn = MakerHeadersFn> extends Data.TaggedCl
  * ```ts
  * import { Effect } from "effect"
  * import { Headers } from "@effect/platform"
- * import { fn } from "./headers"
+ * import { Headers as RestApiHeaders } from "rest-api-client"
  *
- * const headerFn = fn((params: { apiKey: string }) =>
+ * const headerFn = RestApiHeaders.fn((params: { apiKey: string }) =>
  *   Effect.succeed(Headers.fromInput({ "X-API-Key": params.apiKey }))
  * )
  * ```
@@ -69,12 +69,12 @@ export type Headers = Value | Fn
  *
  * @example
  * ```ts
- * import type { MakerHeaders } from "./headers"
+ * import type { Headers as RestApiHeaders } from "rest-api-client"
  * import type { Headers } from "@effect/platform"
  * import type { Effect } from "effect"
  *
- * type Headers1 = MakerHeaders<Headers.Headers>
- * type Headers2 = MakerHeaders<(params: any) => Effect.Effect<Headers.Headers, never, never>>
+ * type Headers1 = RestApiHeaders.MakerHeaders<Headers.Headers>
+ * type Headers2 = RestApiHeaders.MakerHeaders<(params: any) => Effect.Effect<Headers.Headers, never, never>>
  * ```
  */
 export type MakerHeaders = Headers.Headers | MakerHeadersFn
@@ -100,10 +100,10 @@ export type ToHeaders<H extends MakerHeaders> = H extends Headers.Headers
  * @example
  * ```ts
  * import { Headers } from "@effect/platform"
- * import { fromMakerHeaders } from "./headers"
+ * import { Headers as RestApiHeaders } from "rest-api-client"
  *
  * const headers = Headers.fromInput({ "Content-Type": "application/json" })
- * const headerMaker = fromMakerHeaders(headers)
+ * const headerMaker = RestApiHeaders.fromMakerHeaders(headers)
  * ```
  */
 export const fromMakerHeaders = <H extends MakerHeaders>(headers: H) =>

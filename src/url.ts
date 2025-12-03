@@ -20,9 +20,9 @@ export type MakerUrlValue = string
  *
  * @example
  * ```ts
- * import { value } from "./url"
+ * import { Url } from "rest-api-client"
  *
- * const url = value("/todos")
+ * const url = Url.value("/todos")
  * ```
  */
 export const value = (url: MakerUrlValue) => new Value({ url })
@@ -49,9 +49,9 @@ export type MakerUrlFn = (arg: any) => string
  *
  * @example
  * ```ts
- * import { fn } from "./url"
+ * import { Url } from "rest-api-client"
  *
- * const url = fn((params: { id: string }) => `/todos/${params.id}`)
+ * const url = Url.fn((params: { id: string }) => `/todos/${params.id}`)
  * ```
  */
 export const fn = <T extends MakerUrlFn>(fn: T) => new Fn({ fn })
@@ -66,10 +66,10 @@ export type Url = Value | Fn
  *
  * @example
  * ```ts
- * import type { MakerUrl } from "./url"
+ * import type { Url } from "rest-api-client"
  *
- * type Url1 = MakerUrl<"/todos">
- * type Url2 = MakerUrl<(params: { id: string }) => string>
+ * type Url1 = Url.MakerUrl<"/todos">
+ * type Url2 = Url.MakerUrl<(params: { id: string }) => string>
  * ```
  */
 export type MakerUrl = MakerUrlValue | MakerUrlFn
@@ -90,10 +90,10 @@ export type ToUrl<U extends MakerUrl> = U extends MakerUrlValue ? Value : U exte
  *
  * @example
  * ```ts
- * import { fromMakerUrl } from "./url"
+ * import { Url } from "rest-api-client"
  *
- * const urlMaker = fromMakerUrl("/todos")
- * const dynamicUrl = fromMakerUrl((params: { id: string }) => `/todos/${params.id}`)
+ * const urlMaker = Url.fromMakerUrl("/todos")
+ * const dynamicUrl = Url.fromMakerUrl((params: { id: string }) => `/todos/${params.id}`)
  * ```
  */
 export const fromMakerUrl = <U extends MakerUrl>(url: U) => (typeof url === "string" ? value(url) : fn(url))

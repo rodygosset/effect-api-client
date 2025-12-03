@@ -18,7 +18,7 @@ import type { MakerInput } from "./input"
  * ```ts
  * import { Headers } from "@effect/platform"
  * import { Schema } from "effect"
- * import { Client } from "../src"
+ * import { Client } from "rest-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String, description: Schema.String, completed: Schema.Boolean })
  * const ErrorSchema = Schema.Struct({ message: Schema.String })
@@ -49,7 +49,7 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "../src"
+	 * import { Client } from "rest-api-client"
 	 *
 	 * const Todo = Schema.Struct({ id: Schema.String })
 	 * const client = new Client.Client()
@@ -83,7 +83,7 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "../src"
+	 * import { Client } from "rest-api-client"
 	 *
 	 * const NewTodo = Schema.Struct({ title: Schema.String })
 	 * const Todo = Schema.Struct({ id: Schema.String, title: Schema.String })
@@ -119,7 +119,7 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "../src"
+	 * import { Client } from "rest-api-client"
 	 *
 	 * const UpdateTodo = Schema.Struct({ title: Schema.String })
 	 * const client = new Client.Client()
@@ -154,7 +154,7 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect } from "effect"
-	 * import { Client } from "../src"
+	 * import { Client } from "rest-api-client"
 	 *
 	 * const client = new Client.Client()
 	 * const deleteTodo = client.del({ url: "/todos/1" })
@@ -181,7 +181,7 @@ export class Client<
  * @example
  * ```ts
  * import { Layer } from "effect"
- * import { Client } from "../src"
+ * import { Client } from "rest-api-client"
  *
  * const configLayer = Layer.succeed(Client.Config, {
  *   url: "https://api.example.com",
@@ -201,7 +201,7 @@ export class Config extends Context.Tag("@RestApiClient/Config")<
  * @example
  * ```ts
  * import { Effect, Layer } from "effect"
- * import { Client } from "../src"
+ * import { Client } from "rest-api-client"
  * import { FetchHttpClient } from "@effect/platform"
  *
  * const getTodo = Client.get({ url: "/todos/1" })
@@ -210,7 +210,7 @@ export class Config extends Context.Tag("@RestApiClient/Config")<
  *   return todo
  * })
  *
- * const layer = Client.layer.pipe(Layer.provide([FetchHttpClient.layer, Layer.succeed(Config, { url: "https://api.example.com", accessToken: "token" })]))
+ * const layer = Client.layer.pipe(Layer.provide([FetchHttpClient.layer, Layer.succeed(Client.Config, { url: "https://api.example.com", accessToken: "token" })]))
  *
  * program.pipe(
  *   Effect.provide(layer),

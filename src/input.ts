@@ -23,10 +23,10 @@ export class Value<T extends MakerSchema = MakerSchema> extends Data.TaggedClass
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { value } from "./input"
+ * import { Input } from "rest-api-client"
  *
  * const Todo = Schema.Struct({ title: Schema.String })
- * const body = value(Todo, { title: "My Todo" })
+ * const body = Input.value(Todo, { title: "My Todo" })
  * ```
  */
 export const value = <T extends MakerSchema>(schema: T, value: S.Schema.Type<T>) => new Value({ schema, value })
@@ -50,10 +50,10 @@ export class Schema<T extends MakerSchema = MakerSchema> extends Data.TaggedClas
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { schema } from "./input"
+ * import { Input } from "rest-api-client"
  *
  * const Todo = Schema.Struct({ title: Schema.String })
- * const bodyEncoder = schema(Todo)
+ * const bodyEncoder = Input.schema(Todo)
  * ```
  */
 export const schema = <T extends MakerSchema>(schema: T) => new Schema({ schema })
@@ -84,9 +84,9 @@ export class Fn<T extends MakerInputFn = MakerInputFn> extends Data.TaggedClass(
  * ```ts
  * import { Effect } from "effect"
  * import { HttpBody } from "@effect/platform"
- * import { fn } from "./input"
+ * import { Input } from "rest-api-client"
  *
- * const bodyEncoder = fn((params: { file: File }) =>
+ * const bodyEncoder = Input.fn((params: { file: File }) =>
  *   Effect.gen(function* () {
  *     const formData = new FormData()
  *     formData.append("file", params.file)
@@ -107,13 +107,13 @@ export type Input = Value | Schema | Fn
  *
  * @example
  * ```ts
- * import type { MakerInput } from "./input"
+ * import type { Input } from "rest-api-client"
  * import { Schema } from "effect"
  * import type { Effect } from "effect"
  * import type { HttpBody } from "@effect/platform"
  *
- * type Input1 = MakerInput<typeof Schema.Struct({ title: Schema.String })>
- * type Input2 = MakerInput<(params: any) => Effect.Effect<HttpBody.HttpBody, never, never>>
+ * type Input1 = Input.MakerInput<typeof Schema.Struct({ title: Schema.String })>
+ * type Input2 = Input.MakerInput<(params: any) => Effect.Effect<HttpBody.HttpBody, never, never>>
  * ```
  */
 export type MakerInput = Value | MakerSchema | MakerInputFn
@@ -141,10 +141,10 @@ export type ToInput<I extends MakerInput> = I extends Value
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { fromMakerInput } from "./input"
+ * import { Input } from "rest-api-client"
  *
  * const Todo = Schema.Struct({ title: Schema.String })
- * const inputEncoder = fromMakerInput(Todo)
+ * const inputEncoder = Input.fromMakerInput(Todo)
  * ```
  */
 export const fromMakerInput = <I extends MakerInput>(input: I) =>

@@ -21,10 +21,10 @@ export class Schema<T extends MakerSchema = MakerSchema> extends Data.TaggedClas
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { schema } from "./error"
+ * import { Error } from "rest-api-client"
  *
  * const ErrorSchema = Schema.Struct({ message: Schema.String })
- * const errorParser = schema(ErrorSchema)
+ * const errorParser = Error.schema(ErrorSchema)
  * ```
  */
 export const schema = <T extends MakerSchema>(schema: T) => new Schema({ schema })
@@ -54,9 +54,9 @@ export class Fn<T extends MakerErrorFn = MakerErrorFn> extends Data.TaggedClass(
  * @example
  * ```ts
  * import { HttpClientResponse } from "@effect/platform"
- * import { fn } from "./error"
+ * import { Error } from "rest-api-client"
  *
- * const errorTransformer = fn((res: HttpClientResponse.HttpClientResponse) => `Request failed: ${res.status}`)
+ * const errorTransformer = Error.fn((res: HttpClientResponse.HttpClientResponse) => `Request failed: ${res.status}`)
  * ```
  */
 export const fn = <T extends MakerErrorFn>(fn: T) => new Fn({ fn })
@@ -71,12 +71,12 @@ export type Error = Schema | Fn
  *
  * @example
  * ```ts
- * import type { MakerError } from "./error"
+ * import type { Error } from "rest-api-client"
  * import { Schema } from "effect"
  * import type { HttpClientResponse } from "@effect/platform"
  *
- * type Error1 = MakerError<typeof Schema.Struct({ message: Schema.String })>
- * type Error2 = MakerError<(res: HttpClientResponse.HttpClientResponse) => string>
+ * type Error1 = Error.MakerError<typeof Schema.Struct({ message: Schema.String })>
+ * type Error2 = Error.MakerError<(res: HttpClientResponse.HttpClientResponse) => string>
  * ```
  */
 export type MakerError = MakerSchema | MakerErrorFn
@@ -98,10 +98,10 @@ export type ToError<E extends MakerError> = E extends MakerSchema ? Schema<E> : 
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { fromMakerError } from "./error"
+ * import { Error } from "rest-api-client"
  *
  * const ErrorSchema = Schema.Struct({ message: Schema.String })
- * const errorParser = fromMakerError(ErrorSchema)
+ * const errorParser = Error.fromMakerError(ErrorSchema)
  * ```
  */
 export const fromMakerError = <E extends MakerError>(error: E) => (S.isSchema(error) ? schema(error) : fn(error))
@@ -114,11 +114,11 @@ export const fromMakerError = <E extends MakerError>(error: E) => (S.isSchema(er
  *
  * @example
  * ```ts
- * import type { InferResponseError } from "./error"
+ * import type { Error } from "rest-api-client"
  * import { Schema } from "effect"
  *
  * const ErrorSchema = Schema.Struct({ message: Schema.String })
- * type ErrorType = InferResponseError<typeof ErrorSchema>
+ * type ErrorType = Error.InferResponseError<typeof ErrorSchema>
  * // ErrorType = { message: string }
  * ```
  */
