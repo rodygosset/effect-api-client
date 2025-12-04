@@ -8,13 +8,15 @@ import { ApiError, NewTodo, Todo } from "./common"
 // Client with default error handler
 const clientWithError = new Client.Client({
 	error: (res: HttpClientResponse.HttpClientResponse) =>
-		new ApiError({
-			method: res.request.method,
-			endpoint: res.request.url,
-			statusCode: res.status,
-			statusText: String(res.status),
-			message: `Request failed with status ${res.status}`,
-		}),
+		Effect.fail(
+			new ApiError({
+				method: res.request.method,
+				endpoint: res.request.url,
+				statusCode: res.status,
+				statusText: String(res.status),
+				message: `Request failed with status ${res.status}`,
+			})
+		),
 })
 
 // Routes inherit default error handler
@@ -61,13 +63,15 @@ const apiClient = new Client.Client({
 		"X-API-Version": "v1",
 	}),
 	error: (res: HttpClientResponse.HttpClientResponse) =>
-		new ApiError({
-			method: res.request.method,
-			endpoint: res.request.url,
-			statusCode: res.status,
-			statusText: String(res.status),
-			message: `API request failed: ${res.request.method} ${res.request.url}`,
-		}),
+		Effect.fail(
+			new ApiError({
+				method: res.request.method,
+				endpoint: res.request.url,
+				statusCode: res.status,
+				statusText: String(res.status),
+				message: `API request failed: ${res.request.method} ${res.request.url}`,
+			})
+		),
 })
 
 // Routes inherit both defaults
@@ -82,7 +86,7 @@ const updateTodo = apiClient.put({
 const getPublicData = apiClient.get({
 	url: "/public/data",
 	response: Schema.String,
-	error: (res: HttpClientResponse.HttpClientResponse) => `Public endpoint failed: ${res.status}`,
+	error: (res: HttpClientResponse.HttpClientResponse) => Effect.fail(`Public endpoint failed: ${res.status}`),
 })
 
 const example = Effect.gen(function* () {

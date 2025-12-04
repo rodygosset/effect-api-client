@@ -229,7 +229,7 @@ const createTodo = Client.post({
 	url: "/todos",
 	body: NewTodo,
 	response: Todo,
-	error: (res: HttpClientResponse.HttpClientResponse) => `Request failed: ${res.status}`,
+	error: (res: HttpClientResponse.HttpClientResponse) => Effect.fail(`Request failed: ${res.status}`),
 })
 ```
 
@@ -332,9 +332,30 @@ const ApiClientConfigLive = Layer.effect(
 	})
 )
 
-const layer = Client.layer.pipe(Layer.provide([FetchHttpClient.layer, ApiClientConfigLive]))
+const layer = Client.layer.pipe(Layer.provide(ApiClientConfigLive))
 
 program.pipe(Effect.provide(layer), Effect.runPromise)
+```
+
+**Simplified configuration:**
+
+For simple cases, use `layerConfig` to create a layer directly:
+
+```ts
+import { Effect } from "effect"
+import { Client } from "rest-api-client"
+
+const getTodo = Client.get({ url: "/todos/1", response: Todo })
+
+const program = Effect.gen(function* () {
+	const todo = yield* getTodo()
+	return todo
+})
+
+program.pipe(
+	Effect.provide(Client.layerConfig({ url: "https://api.example.com", accessToken: "token" })),
+	Effect.runPromise
+)
 ```
 
 The layer automatically:
@@ -360,10 +381,12 @@ const apiClient = new Client.Client({
 		"X-API-Version": "v1",
 	}),
 	error: (res: HttpClientResponse.HttpClientResponse) =>
-		new ApiError({
-			message: `Request failed: ${res.status}`,
-			statusCode: res.status,
-		}),
+		Effect.fail(
+			new ApiError({
+				message: `Request failed: ${res.status}`,
+				statusCode: res.status,
+			})
+		),
 })
 
 // All routes inherit defaults
@@ -379,6 +402,35 @@ const getPublicData = apiClient.get({
 	error: (res) => `Public endpoint failed: ${res.status}`,
 })
 ```
+
+### Client Service
+
+Create an Effect Service for dependency injection:
+
+```ts
+import { Effect, Layer } from "effect"
+import { Client } from "rest-api-client"
+import { HttpClientResponse } from "@effect/platform"
+
+class ApiClient extends Client.Service<ApiClient>()("@app/ApiClient", {
+	error: (res: HttpClientResponse.HttpClientResponse) => Effect.fail(new Error(`Request failed: ${res.status}`)),
+}) {}
+
+const program = Effect.gen(function* () {
+	const client = yield* ApiClient.client
+	const todo = yield* client.get({ url: "/todos/1", response: Todo })
+	return todo
+})
+
+program.pipe(
+	Effect.provide(
+		Layer.merge(ApiClient.Default, Client.layerConfig({ url: "https://api.example.com", accessToken: "token" }))
+	),
+	Effect.runPromise
+)
+```
+
+See [`examples/05-client-service.ts`](./examples/05-client-service.ts) for a complete example with service dependencies.
 
 ### Static Body Values
 

@@ -216,7 +216,7 @@ export function make<
 					const error = yield* parseResponse(getter.schema, response)
 					return yield* Effect.fail(error)
 				case "@RestApiClient/Error/Fn":
-					return yield* Effect.fail(getter.fn(response))
+					return yield* getter.fn(response)
 			}
 		}) as Effect.Effect<
 			never,

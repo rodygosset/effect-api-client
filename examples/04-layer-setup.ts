@@ -24,7 +24,7 @@ const ApiClientConfigLive = Layer.effect(
 )
 
 // Compose layers: HTTP client + config
-const layer = Client.layer.pipe(Layer.provide([FetchHttpClient.layer, ApiClientConfigLive]))
+const layer = Client.layer.pipe(Layer.provide(ApiClientConfigLive))
 
 // Define routes
 const getTodo = Client.get({

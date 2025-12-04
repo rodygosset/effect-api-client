@@ -70,7 +70,7 @@ const createTodoWithCustomError = Client.post({
 	url: "/todos",
 	body: NewTodo,
 	response: Todo,
-	error: (res: HttpClientResponse.HttpClientResponse) => `Request failed: ${res.status}`,
+	error: (res: HttpClientResponse.HttpClientResponse) => Effect.fail(`Request failed: ${res.status}`),
 })
 
 const example = Effect.gen(function* () {

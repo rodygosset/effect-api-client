@@ -1,6 +1,7 @@
-import { Data, Schema as S } from "effect"
+import { Data, Effect, Schema as S } from "effect"
 import { HttpClientResponse } from "@effect/platform"
 import type { MakerSchema } from "./common"
+import type { InferEffectError } from "./utils"
 
 /**
  * An Effect Schema used to parse error responses.
@@ -33,7 +34,7 @@ export const schema = <T extends MakerSchema>(schema: T) => new Schema({ schema 
  * Function type for custom error transformation.
  * Takes an HTTP response and returns the error value.
  */
-export type MakerErrorFn = (res: HttpClientResponse.HttpClientResponse) => any
+export type MakerErrorFn = (res: HttpClientResponse.HttpClientResponse) => Effect.Effect<void | never, any, any>
 
 /**
  * Error transformer that transforms responses using a custom function.
@@ -56,7 +57,7 @@ export class Fn<T extends MakerErrorFn = MakerErrorFn> extends Data.TaggedClass(
  * import { HttpClientResponse } from "@effect/platform"
  * import { Error } from "rest-api-client"
  *
- * const errorTransformer = Error.fn((res: HttpClientResponse.HttpClientResponse) => `Request failed: ${res.status}`)
+ * const errorTransformer = Error.fn((res: HttpClientResponse.HttpClientResponse) => Effect.fail(new Error(`Request failed: ${res.status}`)))
  * ```
  */
 export const fn = <T extends MakerErrorFn>(fn: T) => new Fn({ fn })
@@ -76,7 +77,7 @@ export type Error = Schema | Fn
  * import type { HttpClientResponse } from "@effect/platform"
  *
  * type Error1 = Error.MakerError<typeof Schema.Struct({ message: Schema.String })>
- * type Error2 = Error.MakerError<(res: HttpClientResponse.HttpClientResponse) => string>
+ * type Error2 = Error.MakerError<(res: HttpClientResponse.HttpClientResponse) => Effect.Effect<never, Error, never>>
  * ```
  */
 export type MakerError = MakerSchema | MakerErrorFn
@@ -125,5 +126,5 @@ export const fromMakerError = <E extends MakerError>(error: E) => (S.isSchema(er
 export type InferResponseError<T extends MakerError> = T extends MakerSchema
 	? S.Schema.Type<T>
 	: T extends MakerErrorFn
-	? ReturnType<T>
+	? InferEffectError<T>
 	: never

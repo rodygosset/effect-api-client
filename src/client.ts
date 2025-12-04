@@ -1,4 +1,4 @@
-import { HttpClientRequest, HttpClient } from "@effect/platform"
+import { HttpClientRequest, HttpClient, FetchHttpClient } from "@effect/platform"
 import { Context, Data, Effect, Layer } from "effect"
 import type { MakerHeaders } from "./headers"
 import type { MakerError } from "./error"
@@ -6,6 +6,8 @@ import * as Make from "./make"
 import type { MakerOutput } from "./output"
 import type { MakerUrl } from "./url"
 import type { MakerInput } from "./input"
+import { ApiError, Todo } from "../examples/common"
+import { Input } from "."
 
 /**
  * Reusable client with default headers and error functions.
@@ -236,6 +238,73 @@ export const layer = Layer.effect(
 
 		return client
 	})
-)
+).pipe(Layer.provide(FetchHttpClient.layer))
+
+/**
+ * Creates a Layer providing HttpClient with the given configuration.
+ * Convenience function that combines the base layer with config and FetchHttpClient.
+ *
+ * @param config - Configuration object with base URL and optional access token
+ * @returns A Layer providing HttpClient configured with the given settings
+ *
+ * @example
+ * ```ts
+ * import { Effect, Layer } from "effect"
+ * import { Client } from "rest-api-client"
+ *
+ * const getTodo = Client.get({ url: "/todos/1" })
+ * const program = Effect.gen(function* () {
+ *   const todo = yield* getTodo()
+ *   return todo
+ * })
+ *
+ * program.pipe(
+ *   Effect.provide(Client.layerConfig({ url: "https://api.example.com", accessToken: "token" })),
+ *   Effect.runPromise
+ * )
+ * ```
+ */
+export const layerConfig = (config: Context.Tag.Service<Config>) =>
+	layer.pipe(Layer.provide([FetchHttpClient.layer, Layer.succeed(Config, config)]))
+
+/**
+ * Creates an Effect Service providing a Client instance with default headers and error handling.
+ * The service exposes the client via an accessor.
+ *
+ * @template Self - Self-referential type for the service class
+ * @template K - Service tag key type
+ * @template DefaultHeaders - Default headers type for routes created by the client
+ * @template DefaultError - Default error parser type for routes created by the client
+ * @param key - Service tag identifier
+ * @param config - Client configuration with optional headers and error handler
+ * @returns A service class providing a Client instance
+ *
+ * @example
+ * ```ts
+ * import { Effect, Schema } from "effect"
+ * import { Client } from "rest-api-client"
+ *
+ * class ApiClient extends Client.Service<ApiClient>()("@app/ApiClient", {
+ *   error: (res) => Effect.fail(new Error(`Request failed: ${res.status}`))
+ * }) {}
+ *
+ * const getTodo = Client.get({ url: "/todos/1" })
+ * const program = Effect.gen(function* () {
+ *   const client = yield* ApiClient.client
+ *   const todo = yield* client.get({ url: "/todos/1", response: Schema.Any })
+ *   return todo
+ * })
+ * ```
+ */
+export const Service =
+	<Self>() =>
+	<K extends string, DefaultHeaders extends MakerHeaders = never, DefaultError extends MakerError = never>(
+		key: K,
+		config: { headers?: DefaultHeaders; error?: DefaultError }
+	) =>
+		class ClientService extends Effect.Service<[Self]>()(key, {
+			sync: () => ({ client: new Client({ headers: config.headers, error: config.error }) }),
+			accessors: true,
+		}) {}
 
 export { get, post, put, del } from "./make"
