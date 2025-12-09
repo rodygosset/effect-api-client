@@ -1,4 +1,5 @@
 import { Headers, HttpBody, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform"
+import { ResponseError } from "@effect/platform/HttpClientError"
 import type { HttpMethod } from "@effect/platform/HttpMethod"
 import { Effect, Option, Schema } from "effect"
 import type { MakerSchema } from "./common"
@@ -251,7 +252,15 @@ export function make<
 
 			const response = yield* client.execute(request)
 
-			if (spec.error && (response.status < 200 || response.status >= 300)) yield* getError(spec.error, response)
+			if (response.status < 200 || response.status >= 300) {
+				if (spec.error) yield* getError(spec.error, response)
+				else
+					yield* new ResponseError({
+						request,
+						response,
+						reason: "StatusCode",
+					})
+			}
 
 			return yield* getResponse(spec.response, response)
 		})
