@@ -4,17 +4,22 @@ import { ApiError, NewTodo, Todo } from "./common"
 import { HttpClientResponse } from "@effect/platform"
 
 // Service providing a client instance with custom error handling
-class ApiClient extends Client.Service<ApiClient>()("@app/ApiClient", {
-	error: (res: HttpClientResponse.HttpClientResponse) =>
-		Effect.fail(
-			new ApiError({
-				method: res.request.method,
-				endpoint: res.request.url,
-				statusCode: res.status,
-				statusText: String(res.status),
-				message: `Request failed: ${res.status}`,
-			})
-		),
+// Client.make() returns a factory function that is used with Effect.Service's 'sync' constructor.
+// The factory function returns { client: new Client(...) }, which Effect.Service uses to create the service instance.
+class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
+	sync: Client.make({
+		error: (res: HttpClientResponse.HttpClientResponse) =>
+			Effect.fail(
+				new ApiError({
+					method: res.request.method,
+					endpoint: res.request.url,
+					statusCode: res.status,
+					statusText: String(res.status),
+					message: `Request failed: ${res.status}`,
+				})
+			),
+	}),
+	accessors: true, // Generates static accessors (e.g., ApiClient.client)
 }) {}
 
 // Service depending on ApiClient, exposing CRUD operations as accessor functions
