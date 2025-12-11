@@ -432,7 +432,7 @@ const program = Effect.gen(function* () {
 program.pipe(Effect.provide(ApiClient.Default), Effect.runPromise)
 ```
 
-See [`examples/05-client-service.ts`](./examples/05-client-service.ts) for a complete example with service dependencies and accessors.
+See [`examples/05-client-service.ts`](./examples/05-client-service.ts) for a complete example with service dependencies.
 
 ### Static Body Values
 
