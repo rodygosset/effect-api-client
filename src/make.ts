@@ -1,13 +1,13 @@
 import { Headers, HttpBody, HttpClient, HttpClientRequest, HttpClientResponse } from "@effect/platform"
 import { ResponseError } from "@effect/platform/HttpClientError"
 import type { HttpMethod } from "@effect/platform/HttpMethod"
-import { Effect, Option, Schema, Layer } from "effect"
+import { Effect, Option, Schema } from "effect"
 import type { MakerSchema } from "./common"
 import { fromMakerError, type InferResponseError, type MakerError, type ToError } from "./error"
 import { fromMakerHeaders, type MakerHeaders, type MakerHeadersFn, type ToHeaders } from "./headers"
 import { fromMakerInput, type MakerInput, type MakerInputFn, type ToInput } from "./input"
 import { fromMakerOutput, type InferOutput, type MakerOutput, type ToOutput } from "./output"
-import { Route, type InferRouteRequirements } from "./route"
+import { Route } from "./route"
 import { fromMakerUrl, type MakerUrl, type MakerUrlFn, type ToUrl } from "./url"
 import type { InferFnError, InferFnRequirements, IsEmptyObject } from "./utils"
 
@@ -183,11 +183,14 @@ export function make<
 			if (spec.body?._tag === "@RestApiClient/Input/Value")
 				return yield* parseBody(spec.body.schema, spec.body.value)
 
-			if (!spec.body || !params || !("body" in params)) return undefined
+			if (!spec.body) return undefined
 
-			if (spec.body._tag === "@RestApiClient/Input/Schema") return yield* parseBody(spec.body.schema, params.body)
+			if (spec.body._tag === "@RestApiClient/Input/Schema") {
+				if (!params || !("body" in params)) return undefined
+				return yield* parseBody(spec.body.schema, params.body)
+			}
 
-			return yield* spec.body.fn(params.body)
+			return yield* spec.body.fn(params && "body" in params ? params.body : undefined)
 		}) as Effect.Effect<
 			HttpBody.Uint8Array | undefined,
 			InferFnError<I> | InferFnError<typeof parseBody>,
