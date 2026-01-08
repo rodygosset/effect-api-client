@@ -1,5 +1,5 @@
 import { Effect, Schema, Layer, Console } from "effect"
-import { Client } from "../src"
+import { Client, Service } from "../src"
 import { ApiError, NewTodo, Todo } from "./common"
 import { HttpClientResponse } from "@effect/platform"
 
@@ -22,7 +22,7 @@ class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
 
 		const logger = yield* Logger
 
-		const client = yield* Client.make({
+		const client = yield* Service.make({
 			error: (res: HttpClientResponse.HttpClientResponse) =>
 				Effect.fail(
 					new ApiError({
@@ -37,7 +37,10 @@ class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
 
 		return client
 	}),
-	dependencies: [Logger.Default, Client.layerConfig({ url: "https://example.com", accessToken: "token" })],
+	dependencies: [
+		Logger.Default,
+		Service.layerConfig({ url: "https://example.com", getAccessToken: Effect.succeed("token") }),
+	],
 }) {}
 
 // Service depending on ApiClient, exposing CRUD operations as accessor functions
@@ -45,6 +48,13 @@ export class TodoRepo extends Effect.Service<TodoRepo>()("@app/TodoRepo", {
 	effect: Effect.gen(function* () {
 		// Yield client dependency from the service context
 		const client = yield* ApiClient
+
+		class GetTodos extends client.Request.Get("app/GetTodos", {
+			url: "/todos",
+			response: Todo.pipe(Schema.Array),
+		}) {}
+
+		const effect = Effect.request(new GetTodos(), GetTodos.resolver)
 
 		// Build route functions using the injected client
 		const getTodos = client.get({ url: "/todos", response: Todo.pipe(Schema.Array) })

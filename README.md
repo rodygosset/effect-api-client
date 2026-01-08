@@ -318,21 +318,21 @@ Configuration is provided via Effect Layers:
 ```ts
 import { FetchHttpClient } from "@effect/platform"
 import { Config, Effect, Layer } from "effect"
-import { Client } from "rest-api-client"
+import { Client, Service } from "rest-api-client"
 
 const ApiClientConfigLive = Layer.effect(
-	Client.Config,
+	Service.Config,
 	Effect.gen(function* () {
 		const url = yield* Config.string("API_URL")
-		const accessToken = yield* Effect.tryPromise({
+		const getAccessToken = Effect.tryPromise({
 			try: async () => "token...",
 			catch: (error) => new Error(String(error)),
 		})
-		return { url, accessToken }
+		return { url, getAccessToken }
 	})
 )
 
-const layer = Client.layer.pipe(Layer.provide(ApiClientConfigLive))
+const layer = Service.layer.pipe(Layer.provide(ApiClientConfigLive))
 
 program.pipe(Effect.provide(layer), Effect.runPromise)
 ```
@@ -343,7 +343,7 @@ For simple cases, use `layerConfig` to create a layer directly:
 
 ```ts
 import { Effect } from "effect"
-import { Client } from "rest-api-client"
+import { Client, Service } from "rest-api-client"
 
 const getTodo = Client.get({ url: "/todos/1", response: Todo })
 
@@ -353,7 +353,7 @@ const program = Effect.gen(function* () {
 })
 
 program.pipe(
-	Effect.provide(Client.layerConfig({ url: "https://api.example.com", accessToken: "token" })),
+	Effect.provide(Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })),
 	Effect.runPromise
 )
 ```
@@ -361,7 +361,7 @@ program.pipe(
 The layer automatically:
 
 -   Prepends base URL to relative URLs (those starting with `/`)
--   Adds Bearer token when `accessToken` is provided
+-   Adds Bearer token when `getAccessToken` is provided
 -   Leaves absolute URLs unchanged
 
 ## Features
@@ -405,22 +405,22 @@ const getPublicData = apiClient.get({
 
 ### Client Service
 
-Create an Effect Service for dependency injection using `Client.make()`. This lifts the HttpClient dependency from route functions to the service level:
+Create an Effect Service for dependency injection using `Service.make()`. This lifts the HttpClient dependency from route functions to the service level:
 
 ```ts
 import { Effect, Layer } from "effect"
-import { Client } from "rest-api-client"
+import { Client, Service } from "rest-api-client"
 import { HttpClientResponse } from "@effect/platform"
 
 class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
 	effect: Effect.gen(function* () {
-		const client = yield* Client.make({
+		const client = yield* Service.make({
 			error: (res: HttpClientResponse.HttpClientResponse) =>
 				Effect.fail(new Error(`Request failed: ${res.status}`)),
 		})
 		return client
 	}),
-	dependencies: [Client.layerConfig({ url: "https://api.example.com", accessToken: "token" })],
+	dependencies: [Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })],
 }) {}
 
 const program = Effect.gen(function* () {
@@ -433,6 +433,49 @@ program.pipe(Effect.provide(ApiClient.Default), Effect.runPromise)
 ```
 
 See [`examples/05-client-service.ts`](./examples/05-client-service.ts) for a complete example with service dependencies.
+
+### Request Batching
+
+Create request classes for use with Effect's request batching and caching capabilities.
+
+```ts
+import { FetchHttpClient } from "@effect/platform"
+import { Effect, Schema } from "effect"
+import { Request } from "rest-api-client"
+
+// GET request class with static URL
+class GetTodos extends Request.Get("app/GetTodos", {
+	spec: { url: "/todos", response: Todo.pipe(Schema.Array) },
+}) {}
+
+// GET with dynamic URL and layer (removes HttpClient dependency)
+class GetTodo extends Request.Get("app/GetTodo", {
+	spec: { url: (params: { id: string }) => `/todos/${params.id}`, response: Todo },
+	layer: FetchHttpClient.layer,
+}) {}
+
+// POST with body
+class CreateTodo extends Request.Post("app/CreateTodo", {
+	spec: {
+		url: "/todos",
+		body: NewTodo,
+		response: Todo,
+	},
+}) {}
+
+// Use with Effect.request
+const program = Effect.gen(function* () {
+	const todos = yield* Effect.request(new GetTodos(), GetTodos.resolver)
+	const todo = yield* Effect.request(new GetTodo({ url: { id: "123" } }), GetTodo.resolver)
+	const created = yield* Effect.request(
+		new CreateTodo({ body: { title: "New Todo", description: "Description" } }),
+		CreateTodo.resolver
+	)
+	return { todos, todo, created }
+})
+```
+
+See [`examples/06-request.ts`](./examples/06-request.ts) for complete examples. For more details on batching and caching, see the [Effect Batching documentation](https://effect.website/docs/batching/).
 
 ### Static Body Values
 

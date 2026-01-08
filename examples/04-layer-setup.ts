@@ -1,5 +1,5 @@
 import { Config, Console, Effect, Layer, Schema } from "effect"
-import { Client } from "../src"
+import { Client, Service } from "../src"
 import { Todo } from "./common"
 
 // Layer setup: providing configuration and HTTP client to Effect runtime
@@ -10,7 +10,7 @@ class AuthError extends Schema.TaggedClass<AuthError>("@app/errors/AuthError")("
 
 // Create API client config layer
 const ApiClientConfigLive = Layer.effect(
-	Client.Config,
+	Service.Config,
 	Effect.gen(function* () {
 		const url = yield* Config.string("API_URL")
 		// wrap auth library like auth.js in an Effect.tryPromise
@@ -23,7 +23,7 @@ const ApiClientConfigLive = Layer.effect(
 )
 
 // Compose layers: HTTP client + config
-const layer = Client.layer.pipe(Layer.provide(ApiClientConfigLive))
+const layer = Service.layer.pipe(Layer.provide(ApiClientConfigLive))
 
 // Define routes
 const getTodo = Client.get({

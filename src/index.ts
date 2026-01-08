@@ -5,5 +5,7 @@ import * as Input from "./input"
 import * as Output from "./output"
 import * as Error from "./error"
 import * as Route from "./route"
+import * as Request from "./request"
+import * as Service from "./service"
 
-export { Client, Headers, Url, Input, Output, Error, Route }
+export { Client, Headers, Url, Input, Output, Error, Route, Request, Service }
