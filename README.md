@@ -413,12 +413,8 @@ import { Client, Service } from "rest-api-client"
 import { HttpClientResponse } from "@effect/platform"
 
 class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
-	effect: Effect.gen(function* () {
-		const client = yield* Service.make({
-			error: (res: HttpClientResponse.HttpClientResponse) =>
-				Effect.fail(new Error(`Request failed: ${res.status}`)),
-		})
-		return client
+	effect: Service.make({
+		error: (res: HttpClientResponse.HttpClientResponse) => Effect.fail(new Error(`Request failed: ${res.status}`)),
 	}),
 	dependencies: [Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })],
 }) {}
@@ -434,7 +430,7 @@ program.pipe(Effect.provide(ApiClient.Default), Effect.runPromise)
 
 See [`examples/05-client-service.ts`](./examples/05-client-service.ts) for a complete example with service dependencies.
 
-### Request Batching
+### Effect.request helper
 
 Create request classes for use with Effect's request batching and caching capabilities.
 
