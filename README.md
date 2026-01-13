@@ -413,12 +413,8 @@ import { Client, Service } from "rest-api-client"
 import { HttpClientResponse } from "@effect/platform"
 
 class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
-	effect: Effect.gen(function* () {
-		const client = yield* Service.make({
-			error: (res: HttpClientResponse.HttpClientResponse) =>
-				Effect.fail(new Error(`Request failed: ${res.status}`)),
-		})
-		return client
+	effect: Service.make({
+		error: (res: HttpClientResponse.HttpClientResponse) => Effect.fail(new Error(`Request failed: ${res.status}`)),
 	}),
 	dependencies: [Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })],
 }) {}
@@ -434,7 +430,7 @@ program.pipe(Effect.provide(ApiClient.Default), Effect.runPromise)
 
 See [`examples/05-client-service.ts`](./examples/05-client-service.ts) for a complete example with service dependencies.
 
-### Request Batching
+### Effect.request helper
 
 Create request classes for use with Effect's request batching and caching capabilities.
 
@@ -476,6 +472,84 @@ const program = Effect.gen(function* () {
 ```
 
 See [`examples/06-request.ts`](./examples/06-request.ts) for complete examples. For more details on batching and caching, see the [Effect Batching documentation](https://effect.website/docs/batching/).
+
+### Client Request Classes
+
+Create request classes that inherit client configuration (headers, error handling, layers) using the client service:
+
+```ts
+import { Effect, Layer, Schema } from "effect"
+import { Client, Service } from "rest-api-client"
+
+// Create a client service with default configuration using Effect.Service
+class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
+	effect: Service.make({
+		headers: Headers.fromInput({
+			Accept: "application/json",
+			"X-API-Version": "v1",
+		}),
+		error: (res: HttpClientResponse.HttpClientResponse) =>
+			Effect.fail(
+				new ApiError({
+					message: `Request failed: ${res.status}`,
+					statusCode: res.status,
+				})
+			),
+	}),
+	dependencies: [Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })],
+}) {}
+
+// Create and use request classes in the same Effect
+const program = Effect.gen(function* () {
+	const client = yield* ApiClient
+
+	// Request classes automatically inherit client configuration
+	class GetTodos extends client.Request.Get("app/GetTodos", {
+		url: "/todos",
+		response: Todo.pipe(Schema.Array),
+	}) {}
+
+	class GetTodo extends client.Request.Get("app/GetTodo", {
+		url: (params: { id: string }) => `/todos/${params.id}`,
+		response: Todo,
+	}) {}
+
+	class CreateTodo extends client.Request.Post("app/CreateTodo", {
+		url: "/todos",
+		body: NewTodo,
+		response: Todo,
+	}) {}
+
+	class UpdateTodo extends client.Request.Put("app/UpdateTodo", {
+		url: (params: { id: string }) => `/todos/${params.id}`,
+		body: Todo,
+		response: Todo,
+	}) {}
+
+	class DeleteTodo extends client.Request.Del("app/DeleteTodo", {
+		url: (params: { id: string }) => `/todos/${params.id}`,
+	}) {}
+
+	// Use the request classes with Effect.request
+	const todos = yield* Effect.request(new GetTodos(), GetTodos.resolver)
+	const todo = yield* Effect.request(new GetTodo({ url: { id: "123" } }), GetTodo.resolver)
+	const created = yield* Effect.request(
+		new CreateTodo({ body: { title: "New Todo" } }),
+		CreateTodo.resolver
+	)
+	const updated = yield* Effect.request(
+		new UpdateTodo({ url: { id: "123" }, body: { id: "123", title: "Updated", completed: true } }),
+		UpdateTodo.resolver
+	)
+	yield* Effect.request(new DeleteTodo({ url: { id: "123" } }), DeleteTodo.resolver)
+	return { todos, todo, created, updated }
+})
+
+program.pipe(
+	Effect.provide(ApiClient.Default),
+	Effect.runPromise
+)
+```
 
 ### Static Body Values
 
