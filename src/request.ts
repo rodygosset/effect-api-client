@@ -1,14 +1,13 @@
-import { Request, RequestResolver, Schema } from "effect"
-import { FetchHttpClient, HttpClient } from "@effect/platform"
-import { Effect, Layer } from "effect"
+import { HttpClient } from "@effect/platform"
+import type { HttpMethod } from "@effect/platform/HttpMethod"
+import { Data, Effect, Layer, Request, RequestResolver } from "effect"
+import * as Client from "./client"
 import type { MakerError } from "./error"
 import type { MakerHeaders } from "./headers"
 import type { MakerInput } from "./input"
 import * as Make from "./make"
 import type { MakerOutput } from "./output"
 import type { MakerUrl } from "./url"
-import type { HttpMethod } from "@effect/platform/HttpMethod"
-import * as Client from "./client"
 
 /**
  * Helper function to declare both a tagged request class and a resolver for it from a maker spec.
@@ -100,7 +99,27 @@ function TaggedClass<
 
 	return class extends Request.TaggedClass(tag)<Success, Error, A> {
 		constructor(params: Params) {
-			super({ params })
+			// if params is void, just pass it to the super constructor
+			if (!params) {
+				super(Data.struct({ params }))
+				return
+			}
+
+			// if it's an object, we make sure to properly contruct nested objects to allow for value equality
+
+			const url = "url" in params ? Data.struct(params.url) : undefined
+			const body = "body" in params ? Data.struct(params.body) : undefined
+			const headers = "headers" in params ? Data.struct(params.headers) : undefined
+
+			let data = { url, body, headers }
+
+			if (!data.url) delete data.url
+			if (!data.body) delete data.body
+			if (!data.headers) delete data.headers
+
+			const dataParams = Data.struct(data) as unknown as Params
+
+			super(Data.struct({ params: dataParams }))
 		}
 		static resolver = resolver
 	} as (new (params: Params) => TaggedRequest) & {
