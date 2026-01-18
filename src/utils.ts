@@ -8,7 +8,7 @@ import type { Effect } from "effect"
  *
  * @example
  * ```ts
- * import type { IsEmptyObject } from "rest-api-client"
+ * import type { IsEmptyObject } from "effect-api-client"
  *
  * type Test1 = IsEmptyObject<{}>
  * // Test1 = true
@@ -27,7 +27,7 @@ export type IsEmptyObject<T> = T extends object ? (keyof T extends never ? true 
  *
  * @example
  * ```ts
- * import type { InferFnError } from "rest-api-client"
+ * import type { InferFnError } from "effect-api-client"
  * import type { Effect } from "effect"
  *
  * type ErrorType = InferFnError<() => Effect.Effect<number, string, never>>
@@ -44,7 +44,7 @@ export type InferFnError<E> = E extends (...args: any[]) => Effect.Effect<any, i
  *
  * @example
  * ```ts
- * import type { InferFnRequirements } from "rest-api-client"
+ * import type { InferFnRequirements } from "effect-api-client"
  * import type { Effect } from "effect"
  *
  * type Reqs = InferFnRequirements<() => Effect.Effect<number, never, { http: HttpClient.HttpClient }>>

@@ -23,7 +23,7 @@ export class Value<T extends MakerSchema = MakerSchema> extends Data.TaggedClass
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { Input } from "rest-api-client"
+ * import { Input } from "effect-api-client"
  *
  * const Todo = Schema.Struct({ title: Schema.String })
  * const body = Input.value(Todo, { title: "My Todo" })
@@ -50,7 +50,7 @@ export class Schema<T extends MakerSchema = MakerSchema> extends Data.TaggedClas
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { Input } from "rest-api-client"
+ * import { Input } from "effect-api-client"
  *
  * const Todo = Schema.Struct({ title: Schema.String })
  * const bodyEncoder = Input.schema(Todo)
@@ -84,7 +84,7 @@ export class Fn<T extends MakerInputFn = MakerInputFn> extends Data.TaggedClass(
  * ```ts
  * import { Effect } from "effect"
  * import { HttpBody } from "@effect/platform"
- * import { Input } from "rest-api-client"
+ * import { Input } from "effect-api-client"
  *
  * const bodyEncoder = Input.fn((params: { file: File }) =>
  *   Effect.gen(function* () {
@@ -107,7 +107,7 @@ export type Input = Value | Schema | Fn
  *
  * @example
  * ```ts
- * import type { Input } from "rest-api-client"
+ * import type { Input } from "effect-api-client"
  * import { Schema } from "effect"
  * import type { Effect } from "effect"
  * import type { HttpBody } from "@effect/platform"
@@ -141,7 +141,7 @@ export type ToInput<I extends MakerInput> = I extends Value
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { Input } from "rest-api-client"
+ * import { Input } from "effect-api-client"
  *
  * const Todo = Schema.Struct({ title: Schema.String })
  * const inputEncoder = Input.fromMakerInput(Todo)

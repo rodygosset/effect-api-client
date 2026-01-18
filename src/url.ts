@@ -20,7 +20,7 @@ export type MakerUrlValue = string
  *
  * @example
  * ```ts
- * import { Url } from "rest-api-client"
+ * import { Url } from "effect-api-client"
  *
  * const url = Url.value("/todos")
  * ```
@@ -49,7 +49,7 @@ export type MakerUrlFn = (arg: any) => string
  *
  * @example
  * ```ts
- * import { Url } from "rest-api-client"
+ * import { Url } from "effect-api-client"
  *
  * const url = Url.fn((params: { id: string }) => `/todos/${params.id}`)
  * ```
@@ -66,7 +66,7 @@ export type Url = Value | Fn
  *
  * @example
  * ```ts
- * import type { Url } from "rest-api-client"
+ * import type { Url } from "effect-api-client"
  *
  * type Url1 = Url.MakerUrl<"/todos">
  * type Url2 = Url.MakerUrl<(params: { id: string }) => string>
@@ -90,7 +90,7 @@ export type ToUrl<U extends MakerUrl> = U extends MakerUrlValue ? Value : U exte
  *
  * @example
  * ```ts
- * import { Url } from "rest-api-client"
+ * import { Url } from "effect-api-client"
  *
  * const urlMaker = Url.fromMakerUrl("/todos")
  * const dynamicUrl = Url.fromMakerUrl((params: { id: string }) => `/todos/${params.id}`)

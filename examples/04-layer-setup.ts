@@ -9,7 +9,7 @@ class AuthError extends Schema.TaggedClass<AuthError>("@app/errors/AuthError")("
 }) {}
 
 // Create API client config layer
-const ApiClientConfigLive = Layer.effect(
+const layerConfig = Layer.effect(
 	Service.Config,
 	Effect.gen(function* () {
 		const url = yield* Config.string("API_URL")
@@ -23,7 +23,7 @@ const ApiClientConfigLive = Layer.effect(
 )
 
 // Compose layers: HTTP client + config
-const layer = Service.layer.pipe(Layer.provide(ApiClientConfigLive))
+const layer = Service.layer.pipe(Layer.provide(layerConfig))
 
 // Define routes
 const getTodo = Client.get({

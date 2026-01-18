@@ -21,7 +21,7 @@ export class Schema<T extends MakerSchema = MakerSchema> extends Data.TaggedClas
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { Output } from "rest-api-client"
+ * import { Output } from "effect-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String, title: Schema.String })
  * const responseParser = Output.schema(Todo)
@@ -55,7 +55,7 @@ export class Fn<T extends MakerOutputFn = MakerOutputFn> extends Data.TaggedClas
  * ```ts
  * import { Effect } from "effect"
  * import { HttpClientResponse } from "@effect/platform"
- * import { Output } from "rest-api-client"
+ * import { Output } from "effect-api-client"
  *
  * const responseProcessor = Output.fn((res: HttpClientResponse.HttpClientResponse) =>
  *   Effect.gen(function* () {
@@ -77,7 +77,7 @@ export type Output = Schema | Fn
  *
  * @example
  * ```ts
- * import type { Output } from "rest-api-client"
+ * import type { Output } from "effect-api-client"
  * import { Schema } from "effect"
  * import type { HttpClientResponse } from "@effect/platform"
  * import type { Effect } from "effect"
@@ -98,7 +98,7 @@ export type MakerOutput = MakerSchema | MakerOutputFn
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { Output } from "rest-api-client"
+ * import { Output } from "effect-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
  * const outputParser = Output.fromMakerOutput(Todo)
@@ -125,7 +125,7 @@ export type ToOutput<O extends MakerOutput> = O extends MakerSchema
  *
  * @example
  * ```ts
- * import type { Output } from "rest-api-client"
+ * import type { Output } from "effect-api-client"
  * import { Schema } from "effect"
  *
  * const Todo = Schema.Struct({ id: Schema.String })

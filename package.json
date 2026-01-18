@@ -1,16 +1,16 @@
 {
-	"name": "rest-api-client",
+	"name": "effect-api-client",
+	"version": "0.1.0",
 	"module": "index.ts",
 	"type": "module",
-	"private": true,
+	"private": false,
 	"devDependencies": {
 		"@types/bun": "latest"
 	},
 	"peerDependencies": {
-		"typescript": "^5"
-	},
-	"dependencies": {
+		"typescript": "^5",
 		"@effect/platform": "^0.93.4",
 		"effect": "^3.19.7"
-	}
+	},
+	"license": "MIT"
 }

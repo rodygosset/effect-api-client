@@ -41,7 +41,7 @@ import * as Client from "./client"
  * Simple GET request with static URL:
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  * import { Todo } from "./common"
  *
  * class GetTodos extends Request.Get("app/GetTodos", {
@@ -57,7 +57,7 @@ import * as Client from "./client"
  * ```ts
  * import { Effect } from "effect"
  * import { FetchHttpClient } from "@effect/platform"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  * import { Todo } from "./common"
  *
  * class GetTodo extends Request.Get("app/GetTodo", {
@@ -140,7 +140,7 @@ function TaggedClass<
  * Simple GET request with static URL:
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  * import { Todo } from "./common"
  *
  * class GetTodos extends Request.Get("app/GetTodos", {
@@ -155,7 +155,7 @@ function TaggedClass<
  * GET request with dynamic URL:
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  * import { Todo } from "./common"
  *
  * class GetTodo extends Request.Get("app/GetTodo", {
@@ -171,7 +171,7 @@ function TaggedClass<
  * ```ts
  * import { Effect } from "effect"
  * import { FetchHttpClient } from "@effect/platform"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  * import { Todo } from "./common"
  *
  * class GetTodo extends Request.Get("app/GetTodo", {
@@ -236,7 +236,7 @@ export const Get = <
  * POST request with body and response:
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  * import { NewTodo, Todo } from "./common"
  *
  * class CreateTodo extends Request.Post("app/CreateTodo", {
@@ -255,7 +255,7 @@ export const Get = <
  * POST request with dynamic URL:
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  * import { Todo } from "./common"
  *
  * class UpdateTodo extends Request.Post("app/UpdateTodo", {
@@ -323,7 +323,7 @@ export const Post = <
  * PUT request with body and response:
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  * import { Todo } from "./common"
  *
  * class UpdateTodo extends Request.Put("app/UpdateTodo", {
@@ -342,7 +342,7 @@ export const Post = <
  * PUT request with static URL:
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  *
  * const UpdateData = Schema.Struct({ title: Schema.String })
  * class UpdateResource extends Request.Put("app/UpdateResource", {
@@ -409,7 +409,7 @@ export const Put = <
  * DELETE request with dynamic URL:
  * ```ts
  * import { Effect } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  *
  * class DeleteTodo extends Request.Del("app/DeleteTodo", {
  *   spec: {
@@ -425,7 +425,7 @@ export const Put = <
  * DELETE request with static URL:
  * ```ts
  * import { Effect } from "effect"
- * import { Request } from "rest-api-client"
+ * import { Request } from "effect-api-client"
  *
  * class DeleteResource extends Request.Del("app/DeleteResource", {
  *   spec: {
