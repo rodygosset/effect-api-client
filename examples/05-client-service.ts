@@ -39,7 +39,7 @@ class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
 	}),
 	dependencies: [
 		Logger.Default,
-		Service.layerConfig({ url: "https://example.com", getAccessToken: Effect.succeed("token") }),
+		Service.layerConfig({ url: "https://example.com", bearerToken: Effect.succeed("token") }),
 	],
 }) {}
 

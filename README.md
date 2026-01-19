@@ -324,11 +324,13 @@ const layerConfig = Layer.effect(
 	Service.Config,
 	Effect.gen(function* () {
 		const url = yield* Config.string("API_URL")
-		const getAccessToken = Effect.tryPromise({
+		
+		const bearerToken = Effect.tryPromise({
 			try: async () => "token...",
 			catch: (error) => new Error(String(error)),
-		})
-		return { url, getAccessToken }
+		}).pipe(Effect.catchAll(() => Effect.succeed(undefined)))
+
+		return { url, bearerToken }
 	})
 )
 
@@ -353,7 +355,7 @@ const program = Effect.gen(function* () {
 })
 
 program.pipe(
-	Effect.provide(Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })),
+	Effect.provide(Service.layerConfig({ url: "https://api.example.com", bearerToken: Effect.succeed("token") })),
 	Effect.runPromise
 )
 ```
@@ -361,7 +363,7 @@ program.pipe(
 The layer automatically:
 
 -   Prepends base URL to relative URLs (those starting with `/`)
--   Adds Bearer token when `getAccessToken` is provided
+-   Adds Bearer token when `bearerToken` is provided
 -   Leaves absolute URLs unchanged
 
 ## Features
@@ -416,7 +418,7 @@ class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
 	effect: Service.make({
 		error: (res: HttpClientResponse.HttpClientResponse) => Effect.fail(new Error(`Request failed: ${res.status}`)),
 	}),
-	dependencies: [Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })],
+	dependencies: [Service.layerConfig({ url: "https://api.example.com", bearerToken: Effect.succeed("token") })],
 }) {}
 
 const program = Effect.gen(function* () {
@@ -496,7 +498,7 @@ class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
 				})
 			),
 	}),
-	dependencies: [Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })],
+	dependencies: [Service.layerConfig({ url: "https://api.example.com", bearerToken: Effect.succeed("token") })],
 }) {}
 
 // Create and use request classes in the same Effect

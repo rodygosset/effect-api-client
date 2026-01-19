@@ -20,13 +20,13 @@ import type { MakerInput } from "./input"
  *
  * const configLayer = Layer.succeed(Service.Config, {
  *   url: "https://api.example.com",
- *   getAccessToken: Effect.succeed("ey...")
+ *   bearerToken: Effect.succeed("ey...")
  * })
  * ```
  */
 export class Config extends Context.Tag("@RestApiClient/Config")<
 	Config,
-	{ url: string; getAccessToken?: Effect.Effect<string | undefined, { _tag: string }> }
+	{ url: string; bearerToken?: Effect.Effect<string | undefined> }
 >() {}
 
 /**
@@ -45,7 +45,7 @@ export class Config extends Context.Tag("@RestApiClient/Config")<
  *   return todo
  * })
  *
- * const layer = Service.layer.pipe(Layer.provide([FetchHttpClient.layer, Layer.succeed(Service.Config, { url: "https://api.example.com", getAccessToken: Effect.succeed("token") })]))
+ * const layer = Service.layer.pipe(Layer.provide([FetchHttpClient.layer, Layer.succeed(Service.Config, { url: "https://api.example.com", bearerToken: Effect.succeed("token") })]))
  *
  * program.pipe(
  *   Effect.provide(layer),
@@ -60,16 +60,16 @@ export const layer = Layer.effect(
 
 		const client = (yield* HttpClient.HttpClient).pipe(
 			// set the base url to the request url if it starts with a slash
-			HttpClient.mapRequestInput((req) =>
+			HttpClient.mapRequest((req) =>
 				req.url.startsWith("/") ? req.pipe(HttpClientRequest.setUrl(config.url + req.url)) : req
 			),
 			// set the bearer token to the request headers if the session is present
-			HttpClient.mapRequestInputEffect((req) =>
+			HttpClient.mapRequestEffect((req) =>
 				Effect.gen(function* () {
-					const accessToken = config.getAccessToken ? yield* config.getAccessToken : undefined
-					if (!accessToken) return req
-					return req.pipe(HttpClientRequest.bearerToken(accessToken))
-				}).pipe(Effect.catchAll(() => Effect.succeed(req)))
+					const token = config.bearerToken ? yield* config.bearerToken : undefined
+					if (!token) return req
+					return req.pipe(HttpClientRequest.bearerToken(token))
+				})
 			)
 		)
 
@@ -96,7 +96,7 @@ export const layer = Layer.effect(
  * })
  *
  * program.pipe(
- *   Effect.provide(Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })),
+ *   Effect.provide(Service.layerConfig({ url: "https://api.example.com", bearerToken: Effect.succeed("token") })),
  *   Effect.runPromise
  * )
  * ```
@@ -245,7 +245,7 @@ const provideFactory =
  *       Effect.fail(new Error(`Request failed: ${res.status}`))
  *   }),
  *   // ApiClient requires HttpClient, provided via dependencies
- *   dependencies: [Service.layerConfig({ url: "https://api.example.com", getAccessToken: Effect.succeed("token") })],
+ *   dependencies: [Service.layerConfig({ url: "https://api.example.com", bearerToken: Effect.succeed("token") })],
  *   accessors: true,
  * }) {}
  *

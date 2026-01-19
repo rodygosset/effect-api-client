@@ -71,7 +71,7 @@ const example = Effect.gen(function* () {
 
 class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {
 	effect: Service.make({ error: ApiError }),
-	dependencies: [Service.layerConfig({ url: "https://example.com", getAccessToken: Effect.succeed("token") })],
+	dependencies: [Service.layerConfig({ url: "https://example.com", bearerToken: Effect.succeed("token") })],
 }) {}
 
 class TodoRepo extends Effect.Service<TodoRepo>()("@app/TodoRepo", {
