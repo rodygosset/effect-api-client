@@ -17,7 +17,7 @@ export class Value extends Data.TaggedClass("@RestApiClient/Headers/Value")<{
  * @example
  * ```ts
  * import { Headers } from "@effect/platform"
- * import { Headers as RestApiHeaders } from "rest-api-client"
+ * import { Headers as RestApiHeaders } from "effect-api-client"
  *
  * const headers = RestApiHeaders.value(Headers.fromInput({ "Content-Type": "application/json" }))
  * ```
@@ -50,7 +50,7 @@ export class Fn<T extends MakerHeadersFn = MakerHeadersFn> extends Data.TaggedCl
  * ```ts
  * import { Effect } from "effect"
  * import { Headers } from "@effect/platform"
- * import { Headers as RestApiHeaders } from "rest-api-client"
+ * import { Headers as RestApiHeaders } from "effect-api-client"
  *
  * const headerFn = RestApiHeaders.fn((params: { apiKey: string }) =>
  *   Effect.succeed(Headers.fromInput({ "X-API-Key": params.apiKey }))
@@ -69,7 +69,7 @@ export type Headers = Value | Fn
  *
  * @example
  * ```ts
- * import type { Headers as RestApiHeaders } from "rest-api-client"
+ * import type { Headers as RestApiHeaders } from "effect-api-client"
  * import type { Headers } from "@effect/platform"
  * import type { Effect } from "effect"
  *
@@ -100,7 +100,7 @@ export type ToHeaders<H extends MakerHeaders> = H extends Headers.Headers
  * @example
  * ```ts
  * import { Headers } from "@effect/platform"
- * import { Headers as RestApiHeaders } from "rest-api-client"
+ * import { Headers as RestApiHeaders } from "effect-api-client"
  *
  * const headers = Headers.fromInput({ "Content-Type": "application/json" })
  * const headerMaker = RestApiHeaders.fromMakerHeaders(headers)

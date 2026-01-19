@@ -16,7 +16,7 @@ import type { MakerInput } from "./input"
  * @example
  * ```ts
  * import { Layer } from "effect"
- * import { Service } from "rest-api-client"
+ * import { Service } from "effect-api-client"
  *
  * const configLayer = Layer.succeed(Service.Config, {
  *   url: "https://api.example.com",
@@ -36,7 +36,7 @@ export class Config extends Context.Tag("@RestApiClient/Config")<
  * @example
  * ```ts
  * import { Effect, Layer } from "effect"
- * import { Client, Service } from "rest-api-client"
+ * import { Client, Service } from "effect-api-client"
  * import { FetchHttpClient } from "@effect/platform"
  *
  * const getTodo = Client.get({ url: "/todos/1" })
@@ -87,7 +87,7 @@ export const layer = Layer.effect(
  * @example
  * ```ts
  * import { Effect, Layer } from "effect"
- * import { Client, Service } from "rest-api-client"
+ * import { Client, Service } from "effect-api-client"
  *
  * const getTodo = Client.get({ url: "/todos/1" })
  * const program = Effect.gen(function* () {
@@ -116,7 +116,7 @@ export const layerConfig = (config: Context.Tag.Service<Config>) =>
  * @example
  * ```ts
  * import { Effect, Schema } from "effect"
- * import { Client } from "rest-api-client"
+ * import { Client } from "effect-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
  * const getTodo: EffectFn<{ url: { id: string } }, Todo, never, HttpClient.HttpClient> =
@@ -143,7 +143,7 @@ type EffectFn<P, A, E, R> = (params: P) => Effect.Effect<A, E, R>
  * @example
  * ```ts
  * import { Effect, Layer, Schema } from "effect"
- * import { Client, Service } from "rest-api-client"
+ * import { Client, Service } from "effect-api-client"
  * import { HttpClient } from "@effect/platform"
  * import { FetchHttpClient } from "@effect/platform"
  *
@@ -172,7 +172,7 @@ export const provideFn =
  * @example
  * ```ts
  * import { Schema } from "effect"
- * import { Client, Service } from "rest-api-client"
+ * import { Client, Service } from "effect-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
  * const client = new Client.Client()
@@ -206,7 +206,7 @@ type EffectFnFactory<C, P, A, E, R> = (config: C) => EffectFn<P, A, E, R>
  * @example
  * ```ts
  * import { Effect, Layer, Schema } from "effect"
- * import { Client, Service } from "rest-api-client"
+ * import { Client, Service } from "effect-api-client"
  * import { HttpClient } from "@effect/platform"
  * import { FetchHttpClient } from "@effect/platform"
  *
@@ -236,7 +236,7 @@ const provideFactory =
  * @example
  * ```ts
  * import { Effect, Schema, Layer } from "effect"
- * import { Client, Service } from "rest-api-client"
+ * import { Client, Service } from "effect-api-client"
  * import { HttpClientResponse } from "@effect/platform"
  *
  * class ApiClient extends Effect.Service<ApiClient>()("@app/ApiClient", {

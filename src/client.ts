@@ -17,7 +17,7 @@ import type { MakerUrl } from "./url"
  * ```ts
  * import { Headers } from "@effect/platform"
  * import { Schema } from "effect"
- * import { Client } from "rest-api-client"
+ * import { Client } from "effect-api-client"
  *
  * const Todo = Schema.Struct({ id: Schema.String, description: Schema.String, completed: Schema.Boolean })
  * const ErrorSchema = Schema.Struct({ message: Schema.String })
@@ -48,7 +48,7 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "rest-api-client"
+	 * import { Client } from "effect-api-client"
 	 *
 	 * const Todo = Schema.Struct({ id: Schema.String })
 	 * const client = new Client.Client()
@@ -82,7 +82,7 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "rest-api-client"
+	 * import { Client } from "effect-api-client"
 	 *
 	 * const NewTodo = Schema.Struct({ title: Schema.String })
 	 * const Todo = Schema.Struct({ id: Schema.String, title: Schema.String })
@@ -118,7 +118,7 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect, Schema } from "effect"
-	 * import { Client } from "rest-api-client"
+	 * import { Client } from "effect-api-client"
 	 *
 	 * const UpdateTodo = Schema.Struct({ title: Schema.String })
 	 * const client = new Client.Client()
@@ -153,7 +153,7 @@ export class Client<
 	 * @example
 	 * ```ts
 	 * import { Effect } from "effect"
-	 * import { Client } from "rest-api-client"
+	 * import { Client } from "effect-api-client"
 	 *
 	 * const client = new Client.Client()
 	 * const deleteTodo = client.del({ url: "/todos/1" })

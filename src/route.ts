@@ -20,7 +20,7 @@ import type { InferFnRequirements } from "./utils"
  *
  * @example
  * ```ts
- * import { Route, Url, Output } from "rest-api-client"
+ * import { Route, Url, Output } from "effect-api-client"
  * import { Schema } from "effect"
  *
  * const Todo = Schema.Struct({ id: Schema.String })
