@@ -4,7 +4,7 @@ A type-safe HTTP client built on [Effect](https://effect.website) that transform
 
 ## Why
 
-Instead of manually constructing HTTP requests with scattered type assertions, `RestApiClient` lets you **describe your API routes declaratively** and get back **fully type-safe Effect functions**:
+Instead of manually constructing HTTP requests with scattered type assertions, Effect API Client lets you **describe your API routes declaratively** and get back **fully type-safe Effect functions**:
 
 ```ts
 import { Effect, Schema } from "effect"
